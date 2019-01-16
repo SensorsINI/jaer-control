@@ -6,16 +6,19 @@ Email : yuhuang.hu@ini.uzh.ch
 
 from __future__ import print_function, absolute_import
 
+import os
+
 import tkinter as tk
 from tkinter.ttk import Progressbar
+from tkinter.filedialog import askdirectory
 
 # global parameters
 WIN_WIDTH, WIN_HEIGHT = 1280, 800
-MASTER_ROWS, MASTER_COLS = 11, 6
-TEXT_ROWS, TEXT_COLS, TEXT_X, TEXT_Y = 6, 6, 0, 0
-PARAM_ROWS, PARAM_COLS, PARAM_X, PARAM_Y = 5, 3, 6, 0
-BUTTON_ROWS, BUTTON_COLS, BUTTON_X, BUTTON_Y = 4, 3, 6, 3
-PROGRESS_COLS, PROGRESS_X, PROGRESS_Y = 6, 10, 0
+MASTER_ROWS, MASTER_COLS = 13, 6
+TEXT_ROWS, TEXT_COLS, TEXT_X, TEXT_Y = 7, 6, 0, 0
+PARAM_ROWS, PARAM_COLS, PARAM_X, PARAM_Y = 5, 3, 7, 0
+BUTTON_ROWS, BUTTON_COLS, BUTTON_X, BUTTON_Y = 5, 3, 7, 3
+PROGRESS_COLS, PROGRESS_X, PROGRESS_Y = 6, 11, 0
 
 # color choice
 TEXT_BG_COLOR = "#EEEEEE"
@@ -37,6 +40,7 @@ class LipreadingRecording(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
+        self.data_root_dir = None
         #  self.pack()
         self.grid()
         self.create_widgets()
@@ -72,7 +76,7 @@ class LipreadingRecording(tk.Frame):
             row=PARAM_X, column=PARAM_Y,
             rowspan=PARAM_ROWS, columnspan=PARAM_COLS,
             sticky=tk.W+tk.E+tk.N+tk.S)
-        self.configure_grid(self.param_frame, PARAM_ROWS, PARAM_COLS, 1)
+        self.configure_grid(self.param_frame, PARAM_ROWS, PARAM_COLS, 0)
         self.parameter_frame_widgets()
 
         # button frame
@@ -81,7 +85,7 @@ class LipreadingRecording(tk.Frame):
             row=BUTTON_X, column=BUTTON_Y,
             rowspan=BUTTON_ROWS, columnspan=BUTTON_COLS,
             sticky=tk.W+tk.E+tk.N+tk.S)
-        self.configure_grid(self.button_frame, BUTTON_ROWS, BUTTON_COLS, 1)
+        self.configure_grid(self.button_frame, BUTTON_ROWS, BUTTON_COLS, 0)
         self.button_frame_widgets()
 
         # progress frame
@@ -132,6 +136,13 @@ class LipreadingRecording(tk.Frame):
         self.stop_button["command"] = self.stop_button_cmd
         self.stop_button.grid(row=3, column=0, columnspan=3)
 
+        self.select_root_button = tk.Button(self.button_frame)
+        self.select_root_button["text"] = "Select Data Root"
+        self.select_root_button["font"] = BUTTON_FONT
+        self.select_root_button["width"] = BUTTON_LABEL_WIDTH
+        self.select_root_button["command"] = self.select_data_root
+        self.select_root_button.grid(row=4, column=0, columnspan=3)
+
     def parameter_frame_widgets(self):
         # text boxes
         self.subject_label = tk.Label(
@@ -146,16 +157,16 @@ class LipreadingRecording(tk.Frame):
         self.subject_text.insert(tk.END, "001")
         self.subject_text.grid(row=0, column=1, columnspan=2)
 
-        self.trail_label = tk.Label(
+        self.trial_label = tk.Label(
             self.param_frame, text="Trial ID:",
             font=PARAM_FONT,
             bg=PARAM_BG_COLOR,
             anchor="e",
             width=PARAM_LABEL_WIDTH)
-        self.trail_label.grid(row=1, column=0)
-        self.trail_text = tk.Entry(self.param_frame, font=PARAM_FONT)
-        self.trail_text.insert(tk.END, "1")
-        self.trail_text.grid(row=1, column=1, columnspan=2)
+        self.trial_label.grid(row=1, column=0)
+        self.trial_text = tk.Entry(self.param_frame, font=PARAM_FONT)
+        self.trial_text.insert(tk.END, "1")
+        self.trial_text.grid(row=1, column=1, columnspan=2)
 
         self.num_sentence_label = tk.Label(
             self.param_frame, text="No. sentence(s)/trial:",
@@ -181,23 +192,62 @@ class LipreadingRecording(tk.Frame):
         self.duration_text.insert(tk.END, "3")
         self.duration_text.grid(row=3, column=1, columnspan=2)
 
-        self.duration_label = tk.Label(
+        self.gap_label = tk.Label(
             self.param_frame, text="Gap [secs]:",
             font=PARAM_FONT,
             bg=PARAM_BG_COLOR,
             anchor="e",
             width=PARAM_LABEL_WIDTH)
-        self.duration_label.grid(row=3, column=0)
-        self.duration_text = tk.Entry(
+        self.gap_label.grid(row=4, column=0)
+        self.gap_text = tk.Entry(
             self.param_frame, font=PARAM_FONT)
-        self.duration_text.insert(tk.END, "2")
-        self.duration_text.grid(row=4, column=1, columnspan=2)
+        self.gap_text.insert(tk.END, "2")
+        self.gap_text.grid(row=4, column=1, columnspan=2)
+
+    def validate_data_root(self):
+        if self.data_root_dir is None or \
+                os.path.isdir(self.data_root_dir) is False:
+            self.data_root_dir = os.path.join(
+                os.environ["HOME"], "lipreading_data")
+            os.makedirs(self.data_root_dir)
 
     def start_button_cmd(self):
-        print("Start button")
-
         # get all variables in the parameter boxes
-        
+        self.subject_id = self.subject_text.get()
+        self.trial_id = self.trial_text.get()
+        self.num_sentences = int(self.num_sentence_text.get())
+        self.duration = float(self.duration_text.get())  # in secs
+        self.gap = float(self.gap_text.get())  # in secs
+
+        # freeze the change of the variables
+        self.disable_param_text()
+
+        # construct recording folder
+        self.validate_data_root()
+        self.current_trial_folder = os.path.join(
+            self.data_root_dir, self.subject_id, self.trial_id)
+        assert os.path.isdir(self.current_trial_folder) is False
+        os.makedirs(self.current_trial_folder)
+
+        # start looping through the sentences
+        # TODO
+
+        # complete trial
+        self.enable_param_text()
+
+    def disable_param_text(self):
+        self.subject_text["state"] = "disabled"
+        self.trial_text["state"] = "disabled"
+        self.num_sentence_text["state"] = "disabled"
+        self.duration_text["state"] = "disabled"
+        self.gap_text["state"] = "disabled"
+
+    def enable_param_text(self):
+        self.subject_text["state"] = "normal"
+        self.trial_text["state"] = "normal"
+        self.num_sentence_text["state"] = "normal"
+        self.duration_text["state"] = "normal"
+        self.gap_text["state"] = "normal"
 
     def stop_button_cmd(self):
         print("Stop button")
@@ -207,6 +257,9 @@ class LipreadingRecording(tk.Frame):
 
     def training_button_cmd(self):
         print("Training button")
+
+    def select_data_root(self):
+        self.data_root_dir = askdirectory()
 
 
 root = tk.Tk()
