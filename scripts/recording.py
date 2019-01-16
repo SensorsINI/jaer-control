@@ -15,6 +15,8 @@ import tkinter as tk
 from tkinter.ttk import Progressbar
 from tkinter.filedialog import askdirectory
 
+from jaercon.controller import jAERController
+
 # global parameters
 WIN_WIDTH, WIN_HEIGHT = 1280, 800
 MASTER_ROWS, MASTER_COLS = 13, 6
@@ -58,7 +60,11 @@ class LipreadingRecording(tk.Frame):
         self.data_root_dir = None
         self.skip_curr_item = False
         self.gap_wait_counter = 0
-        #  self.pack()
+        # MAKE SURE IN THIS ORDER!!!
+        self.davis_control = jAERController(udp_port=8997)
+        self.das_control = jAERController(udp_port=8998)
+
+        # Drawing related
         self.grid()
         self.create_widgets()
 
@@ -240,18 +246,17 @@ class LipreadingRecording(tk.Frame):
         self.disable_param_text()
 
         # construct recording folder
-        #  self.validate_data_root()
-        #  self.current_trial_folder = os.path.join(
-        #      self.data_root_dir, self.subject_id, self.trial_id)
-        #  assert os.path.isdir(self.current_trial_folder) is False
-        #  os.makedirs(self.current_trial_folder)
+        self.validate_data_root()
+        self.current_trial_folder = os.path.join(
+            self.data_root_dir, self.subject_id, self.trial_id)
+        assert os.path.isdir(self.current_trial_folder) is False
+        os.makedirs(self.current_trial_folder)
 
         # start sign
         self.display_text("We are about to start!", "green")
         self.sleep(3)
 
         # start looping through the sentences
-        # TODO
         sentences = self.prepare_text(self.num_sentences)
         for sen_id in range(self.num_sentences):
             # get the text
@@ -259,11 +264,11 @@ class LipreadingRecording(tk.Frame):
             curr_sentence = sentences[sen_id]
 
             # get to control flow
-            success = self.record_one_sentence(curr_sentence, sen_id)
+            save_paths = self.record_one_sentence(curr_sentence, sen_id)
 
             # pause the gap
             do_skip, extra_sleep = self.check_skip_pressed()
-            self.remove_last_recording(do_skip)
+            self.remove_last_recording(save_paths, do_skip)
             if extra_sleep != 0:
                 self.sleep(extra_sleep)
 
@@ -288,16 +293,22 @@ class LipreadingRecording(tk.Frame):
 
     def record_one_sentence(self, text, text_id):
         # construct the save paths
-        #  filename_base = text.replace(" ", "_")+"_"+str(text_id)
-        #  davis_save_path = os.path.join(
-        #      self.current_trial_folder, filename_base+"_davis.aedat")
-        #  das_save_path = os.path.join(
-        #      self.current_trial_folder, filename_base+"_das.aedat")
-        #  mic_save_path = os.path.join(
-        #      self.current_trial_folder, filename_base+"_mic.wav")
+        filename_base = text.replace(" ", "_")+"_"+str(text_id)
+        davis_save_path = os.path.join(
+            self.current_trial_folder, filename_base+"_davis.aedat")
+        das_save_path = os.path.join(
+            self.current_trial_folder, filename_base+"_das.aedat")
+        mic_save_path = os.path.join(
+            self.current_trial_folder, filename_base+"_mic.wav")
 
         # zero time stamps for all windows
+        self.davis_control.reset_time()
         # start logging for all sensors
+        self.davis_control.start_logging(
+            davis_save_path, title=None, reset_time=False)
+        self.das_control.start_logging(
+            das_save_path, title=None, reset_time=False)
+        # TODO: to start logging mic
 
         # give beep for signal
         # display text and change the text color
@@ -307,12 +318,15 @@ class LipreadingRecording(tk.Frame):
         self.sleep(self.duration)
 
         # change the text to None
-        self.display_text("", color="red")
+        self.display_text("------", color="blue")
 
         # save all the files
         # close logging
+        self.davis_control.stop_logging()
+        self.das_control.stop_logging()
+        # TODO: to stop logging mic
 
-        # return true
+        return (davis_save_path, das_save_path, mic_save_path)
 
     def display_text(self, text, color):
         """Change text label's content."""
@@ -346,10 +360,20 @@ class LipreadingRecording(tk.Frame):
                 return True, sleep_time*(num_checks-check_idx+1)
         return False, 0
 
-    def remove_last_recording(self, do_remove=False):
+    def remove_last_recording(self, save_paths, do_remove=False):
         """For cleaning the last recording if skip."""
         if do_remove is True:
-            print("about to clean up this bad recording.")
+            try:
+                os.remove(save_paths[0])
+                print("Recording %s removed" % (save_paths[0]))
+                os.remove(save_paths[1])
+                print("Recording %s removed" % (save_paths[1]))
+                os.remove(save_paths[2])
+                print("Recording %s removed" % (save_paths[2]))
+            except OSError:
+                pass
+
+            # restore
             self.skip_curr_item = False
 
     def training_button_cmd(self):

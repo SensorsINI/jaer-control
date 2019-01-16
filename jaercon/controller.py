@@ -85,7 +85,10 @@ class jAERController(object):
         try:
             if reset_time is True:
                 self.reset_time()
-            rec_path = os.path.join(save_path, title)
+            if title is not None:
+                rec_path = os.path.join(save_path, title)
+            else:
+                rec_path = save_path
             line = "startlogging "+rec_path
 
             self.conn.sendto(line, self.address)
