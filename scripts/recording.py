@@ -13,7 +13,7 @@ from tkinter.ttk import Progressbar
 WIN_WIDTH, WIN_HEIGHT = 1280, 800
 MASTER_ROWS, MASTER_COLS = 11, 6
 TEXT_ROWS, TEXT_COLS, TEXT_X, TEXT_Y = 6, 6, 0, 0
-PARAM_ROWS, PARAM_COLS, PARAM_X, PARAM_Y = 4, 3, 6, 0
+PARAM_ROWS, PARAM_COLS, PARAM_X, PARAM_Y = 5, 3, 6, 0
 BUTTON_ROWS, BUTTON_COLS, BUTTON_X, BUTTON_Y = 4, 3, 6, 3
 PROGRESS_COLS, PROGRESS_X, PROGRESS_Y = 6, 10, 0
 
@@ -29,8 +29,8 @@ PARAM_FONT = "Helvetica 20"
 BUTTON_FONT = "Helvetica 20"
 
 # label dimensions
-PARAM_LABEL_WIDTH = 15
-BUTTON_LABEL_WIDTH = 15
+PARAM_LABEL_WIDTH = 20
+BUTTON_LABEL_WIDTH = 20
 
 
 class LipreadingRecording(tk.Frame):
@@ -104,19 +104,19 @@ class LipreadingRecording(tk.Frame):
 
     def button_frame_widgets(self):
         # buttons
+        self.training_button = tk.Button(self.button_frame)
+        self.training_button["text"] = "Training Session"
+        self.training_button["font"] = BUTTON_FONT
+        self.training_button["width"] = BUTTON_LABEL_WIDTH
+        self.training_button["command"] = self.training_button_cmd
+        self.training_button.grid(row=0, column=0, columnspan=3)
+
         self.start_button = tk.Button(self.button_frame)
         self.start_button["text"] = "Start"
         self.start_button["font"] = BUTTON_FONT
         self.start_button["width"] = BUTTON_LABEL_WIDTH
         self.start_button["command"] = self.start_button_cmd
-        self.start_button.grid(row=0, column=0, columnspan=3)
-
-        self.stop_button = tk.Button(self.button_frame)
-        self.stop_button["text"] = "Stop"
-        self.stop_button["font"] = BUTTON_FONT
-        self.stop_button["width"] = BUTTON_LABEL_WIDTH
-        self.stop_button["command"] = self.stop_button_cmd
-        self.stop_button.grid(row=1, column=0, columnspan=3)
+        self.start_button.grid(row=1, column=0, columnspan=3)
 
         self.skip_button = tk.Button(self.button_frame)
         self.skip_button["text"] = "Skip"
@@ -125,12 +125,12 @@ class LipreadingRecording(tk.Frame):
         self.skip_button["command"] = self.skip_button_cmd
         self.skip_button.grid(row=2, column=0, columnspan=3)
 
-        self.training_button = tk.Button(self.button_frame)
-        self.training_button["text"] = "Training Session"
-        self.training_button["font"] = BUTTON_FONT
-        self.training_button["width"] = BUTTON_LABEL_WIDTH
-        self.training_button["command"] = self.training_button_cmd
-        self.training_button.grid(row=3, column=0, columnspan=3)
+        self.stop_button = tk.Button(self.button_frame)
+        self.stop_button["text"] = "Stop"
+        self.stop_button["font"] = BUTTON_FONT
+        self.stop_button["width"] = BUTTON_LABEL_WIDTH
+        self.stop_button["command"] = self.stop_button_cmd
+        self.stop_button.grid(row=3, column=0, columnspan=3)
 
     def parameter_frame_widgets(self):
         # text boxes
@@ -147,7 +147,7 @@ class LipreadingRecording(tk.Frame):
         self.subject_text.grid(row=0, column=1, columnspan=2)
 
         self.trail_label = tk.Label(
-            self.param_frame, text="No. Trial(s):",
+            self.param_frame, text="Trial ID:",
             font=PARAM_FONT,
             bg=PARAM_BG_COLOR,
             anchor="e",
@@ -158,7 +158,7 @@ class LipreadingRecording(tk.Frame):
         self.trail_text.grid(row=1, column=1, columnspan=2)
 
         self.num_sentence_label = tk.Label(
-            self.param_frame, text="No. sentence(s):",
+            self.param_frame, text="No. sentence(s)/trial:",
             font=PARAM_FONT,
             bg=PARAM_BG_COLOR,
             anchor="e",
@@ -180,6 +180,18 @@ class LipreadingRecording(tk.Frame):
             self.param_frame, font=PARAM_FONT)
         self.duration_text.insert(tk.END, "3")
         self.duration_text.grid(row=3, column=1, columnspan=2)
+
+        self.duration_label = tk.Label(
+            self.param_frame, text="Gap [secs]:",
+            font=PARAM_FONT,
+            bg=PARAM_BG_COLOR,
+            anchor="e",
+            width=PARAM_LABEL_WIDTH)
+        self.duration_label.grid(row=3, column=0)
+        self.duration_text = tk.Entry(
+            self.param_frame, font=PARAM_FONT)
+        self.duration_text.insert(tk.END, "2")
+        self.duration_text.grid(row=4, column=1, columnspan=2)
 
     def start_button_cmd(self):
         print("Start button")
