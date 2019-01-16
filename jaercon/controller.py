@@ -45,7 +45,7 @@ class jAERController(object):
     def establish_connection(self):
         """Open the socket connection."""
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.bind(("", 0))
+        self.conn.bind(("".encode('utf-8'), 0))
         print("The socket is established.")
 
     def close_connection(self):
@@ -60,7 +60,7 @@ class jAERController(object):
     def reset_time(self):
         """Reset timestamps."""
         try:
-            self.conn.sendto("zerotimestamps", self.address)
+            self.conn.sendto("zerotimestamps".encode('utf-8'), self.address)
             time.sleep(self.wait_time)
         except TypeError:
             raise
@@ -91,7 +91,7 @@ class jAERController(object):
                 rec_path = save_path
             line = "startlogging "+rec_path
 
-            self.conn.sendto(line, self.address)
+            self.conn.sendto(line.encode('utf-8'), self.address)
 
             data, fromaddr = self.conn.recvfrom(self.bufsize)
             print("Client received %r from %r" % (data, fromaddr))
@@ -103,7 +103,7 @@ class jAERController(object):
     def stop_logging(self):
         """Stop logging."""
         try:
-            self.conn.sendto("stoplogging", self.address)
+            self.conn.sendto("stoplogging".encode('utf-8'), self.address)
             data, fromaddr = self.conn.recvfrom(self.bufsize)
 
             print("Client received %r form %r" % (data, fromaddr))
