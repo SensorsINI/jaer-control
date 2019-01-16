@@ -6,8 +6,6 @@ Email : yuhuang.hu@ini.uzh.ch
 
 from __future__ import print_function, absolute_import
 
-import argparse
-
 import tkinter as tk
 from tkinter.ttk import Progressbar
 
@@ -19,10 +17,16 @@ PARAM_ROWS, PARAM_COLS, PARAM_X, PARAM_Y = 4, 3, 6, 0
 BUTTON_ROWS, BUTTON_COLS, BUTTON_X, BUTTON_Y = 4, 3, 6, 3
 PROGRESS_COLS, PROGRESS_X, PROGRESS_Y = 6, 10, 0
 
+# color choice
 TEXT_BG_COLOR = "antique white"
 PARAM_BG_COLOR = "#FFC107"
 BUTTON_BG_COLOR = "#B2FF59"
 PROGRESS_BG_COLOR = "#80D8FF"
+
+# font choice
+TEXT_FONT = "Helvetica 50 bold"
+PARAM_FONT = "Helvetica 20"
+BUTTON_FONT = "Helvetica 20"
 
 
 class LipreadingRecording(tk.Frame):
@@ -54,7 +58,7 @@ class LipreadingRecording(tk.Frame):
         # text label
         self.text_label = tk.Label(
             self.text_frame, text="Welcome",
-            font="Helvetica 50 bold",
+            font=TEXT_FONT,
             bg=TEXT_BG_COLOR)
         self.text_label.place(relx=0.5, rely=0.5, anchor="center")
 
@@ -91,25 +95,25 @@ class LipreadingRecording(tk.Frame):
         # buttons
         self.start_button = tk.Button(self.button_frame)
         self.start_button["text"] = "Start"
-        self.start_button["font"] = "Helvetica 20"
+        self.start_button["font"] = BUTTON_FONT
         self.start_button["command"] = self.start_button_cmd
         self.start_button.grid(row=0, column=0, columnspan=3)
 
         self.stop_button = tk.Button(self.button_frame)
         self.stop_button["text"] = "Stop"
-        self.stop_button["font"] = "Helvetica 20"
+        self.stop_button["font"] = BUTTON_FONT
         self.stop_button["command"] = self.stop_button_cmd
         self.stop_button.grid(row=1, column=0, columnspan=3)
 
         self.skip_button = tk.Button(self.button_frame)
         self.skip_button["text"] = "Skip"
-        self.skip_button["font"] = "Helvetica 20"
+        self.skip_button["font"] = BUTTON_FONT
         self.skip_button["command"] = self.skip_button_cmd
         self.skip_button.grid(row=2, column=0, columnspan=3)
 
         self.training_button = tk.Button(self.button_frame)
         self.training_button["text"] = "Training Session"
-        self.training_button["font"] = "Helvetica 20"
+        self.training_button["font"] = BUTTON_FONT
         self.training_button["command"] = self.training_button_cmd
         self.training_button.grid(row=3, column=0, columnspan=3)
 
@@ -160,9 +164,6 @@ class LipreadingRecording(tk.Frame):
 
     def training_button_cmd(self):
         print("Training button")
-
-    #  def say_hi(self):
-    #      print("hi there, everyone!")
 
 
 root = tk.Tk()
