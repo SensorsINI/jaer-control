@@ -100,6 +100,7 @@ class LipreadingRecording(tk.Frame):
         self.start_button = tk.Button(self.button_frame)
         self.start_button["text"] = "Start"
         self.start_button["font"] = BUTTON_FONT
+        self.start_button["width"] = BUTTON_LABEL_WIDTH
         self.start_button["command"] = self.start_button_cmd
         self.start_button.grid(row=0, column=0, columnspan=3)
 
