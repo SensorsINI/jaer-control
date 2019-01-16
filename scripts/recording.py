@@ -118,6 +118,14 @@ class LipreadingRecording(tk.Frame):
             self.param_frame, font="Helvetica 20")
         self.num_sentence_text.grid(row=2, column=1, columnspan=2)
 
+        self.duration_label = tk.Label(
+            self.param_frame, text="Duration [secs]",
+            font="Helvetica 20")
+        self.duration_label.grid(row=3, column=0)
+        self.duration_text = tk.Entry(
+            self.param_frame, font="Helvetica 20")
+        self.duration_text.grid(row=3, column=1, columnspan=2)
+
     #  def say_hi(self):
     #      print("hi there, everyone!")
 
