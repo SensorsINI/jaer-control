@@ -18,7 +18,7 @@ BUTTON_ROWS, BUTTON_COLS, BUTTON_X, BUTTON_Y = 4, 3, 6, 3
 PROGRESS_COLS, PROGRESS_X, PROGRESS_Y = 6, 10, 0
 
 # color choice
-TEXT_BG_COLOR = "antique white"
+TEXT_BG_COLOR = "#EEEEEE"
 PARAM_BG_COLOR = "#FFC107"
 BUTTON_BG_COLOR = "#B2FF59"
 PROGRESS_BG_COLOR = "#80D8FF"
@@ -92,8 +92,15 @@ class LipreadingRecording(tk.Frame):
             sticky=tk.W+tk.E+tk.N+tk.S)
 
         # progress bar
+        self.progress_val = tk.IntVar()
+        self.progress_val.set(40)
         self.progress_bar = Progressbar(
-            self.progress_frame, length=100)
+            self.progress_frame, length=100,
+            orient="horizontal",
+            maximum=100,
+            variable=self.progress_val,
+            mode="determinate")
+        self.progress_bar.pack(fill=tk.BOTH, ipady=5)
 
     def button_frame_widgets(self):
         # buttons
@@ -107,18 +114,21 @@ class LipreadingRecording(tk.Frame):
         self.stop_button = tk.Button(self.button_frame)
         self.stop_button["text"] = "Stop"
         self.stop_button["font"] = BUTTON_FONT
+        self.stop_button["width"] = BUTTON_LABEL_WIDTH
         self.stop_button["command"] = self.stop_button_cmd
         self.stop_button.grid(row=1, column=0, columnspan=3)
 
         self.skip_button = tk.Button(self.button_frame)
         self.skip_button["text"] = "Skip"
         self.skip_button["font"] = BUTTON_FONT
+        self.skip_button["width"] = BUTTON_LABEL_WIDTH
         self.skip_button["command"] = self.skip_button_cmd
         self.skip_button.grid(row=2, column=0, columnspan=3)
 
         self.training_button = tk.Button(self.button_frame)
         self.training_button["text"] = "Training Session"
         self.training_button["font"] = BUTTON_FONT
+        self.training_button["width"] = BUTTON_LABEL_WIDTH
         self.training_button["command"] = self.training_button_cmd
         self.training_button.grid(row=3, column=0, columnspan=3)
 
