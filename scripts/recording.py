@@ -28,6 +28,10 @@ TEXT_FONT = "Helvetica 50 bold"
 PARAM_FONT = "Helvetica 20"
 BUTTON_FONT = "Helvetica 20"
 
+# label dimensions
+PARAM_LABEL_WIDTH = 15
+BUTTON_LABEL_WIDTH = 15
+
 
 class LipreadingRecording(tk.Frame):
     def __init__(self, master=None):
@@ -37,16 +41,16 @@ class LipreadingRecording(tk.Frame):
         self.grid()
         self.create_widgets()
 
-    def configure_grid(self, master, num_rows, num_cols):
+    def configure_grid(self, master, num_rows, num_cols, weight=1):
         """Configure a grid in a Frame."""
         for r in range(num_rows):
-            master.rowconfigure(r, weight=1)
+            master.rowconfigure(r, weight=weight)
         for c in range(num_cols):
-            master.columnconfigure(c, weight=1)
+            master.columnconfigure(c, weight=weight)
 
     def create_widgets(self):
         # get grid layout
-        self.configure_grid(self.master, MASTER_ROWS, MASTER_COLS)
+        self.configure_grid(self.master, MASTER_ROWS, MASTER_COLS, 1)
 
         # text frame
         self.text_frame = tk.Frame(self.master, bg=TEXT_BG_COLOR)
@@ -68,7 +72,7 @@ class LipreadingRecording(tk.Frame):
             row=PARAM_X, column=PARAM_Y,
             rowspan=PARAM_ROWS, columnspan=PARAM_COLS,
             sticky=tk.W+tk.E+tk.N+tk.S)
-        self.configure_grid(self.param_frame, PARAM_ROWS, PARAM_COLS)
+        self.configure_grid(self.param_frame, PARAM_ROWS, PARAM_COLS, 1)
         self.parameter_frame_widgets()
 
         # button frame
@@ -77,7 +81,7 @@ class LipreadingRecording(tk.Frame):
             row=BUTTON_X, column=BUTTON_Y,
             rowspan=BUTTON_ROWS, columnspan=BUTTON_COLS,
             sticky=tk.W+tk.E+tk.N+tk.S)
-        self.configure_grid(self.button_frame, BUTTON_ROWS, BUTTON_COLS)
+        self.configure_grid(self.button_frame, BUTTON_ROWS, BUTTON_COLS, 1)
         self.button_frame_widgets()
 
         # progress frame
@@ -121,36 +125,49 @@ class LipreadingRecording(tk.Frame):
         # text boxes
         self.subject_label = tk.Label(
             self.param_frame, text="Subject ID:",
-            font="Helvetica 20",
-            bg=PARAM_BG_COLOR)
+            font=PARAM_FONT,
+            bg=PARAM_BG_COLOR,
+            anchor="e",
+            width=PARAM_LABEL_WIDTH)
         self.subject_label.grid(row=0, column=0)
-        self.subject_text = tk.Entry(self.param_frame, font="Helvetica 20")
+        self.subject_text = tk.Entry(
+            self.param_frame, font=PARAM_FONT)
+        self.subject_text.insert(tk.END, "001")
         self.subject_text.grid(row=0, column=1, columnspan=2)
 
         self.trail_label = tk.Label(
             self.param_frame, text="No. Trial(s):",
-            font="Helvetica 20",
-            bg=PARAM_BG_COLOR)
+            font=PARAM_FONT,
+            bg=PARAM_BG_COLOR,
+            anchor="e",
+            width=PARAM_LABEL_WIDTH)
         self.trail_label.grid(row=1, column=0)
-        self.trail_text = tk.Entry(self.param_frame, font="Helvetica 20")
+        self.trail_text = tk.Entry(self.param_frame, font=PARAM_FONT)
+        self.trail_text.insert(tk.END, "1")
         self.trail_text.grid(row=1, column=1, columnspan=2)
 
         self.num_sentence_label = tk.Label(
             self.param_frame, text="No. sentence(s):",
-            font="Helvetica 20",
-            bg=PARAM_BG_COLOR)
+            font=PARAM_FONT,
+            bg=PARAM_BG_COLOR,
+            anchor="e",
+            width=PARAM_LABEL_WIDTH)
         self.num_sentence_label.grid(row=2, column=0)
         self.num_sentence_text = tk.Entry(
-            self.param_frame, font="Helvetica 20")
+            self.param_frame, font=PARAM_FONT)
+        self.num_sentence_text.insert(tk.END, "50")
         self.num_sentence_text.grid(row=2, column=1, columnspan=2)
 
         self.duration_label = tk.Label(
             self.param_frame, text="Duration [secs]:",
-            font="Helvetica 20",
-            bg=PARAM_BG_COLOR)
+            font=PARAM_FONT,
+            bg=PARAM_BG_COLOR,
+            anchor="e",
+            width=PARAM_LABEL_WIDTH)
         self.duration_label.grid(row=3, column=0)
         self.duration_text = tk.Entry(
-            self.param_frame, font="Helvetica 20")
+            self.param_frame, font=PARAM_FONT)
+        self.duration_text.insert(tk.END, "3")
         self.duration_text.grid(row=3, column=1, columnspan=2)
 
     def start_button_cmd(self):
