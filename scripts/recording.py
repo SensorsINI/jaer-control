@@ -7,6 +7,7 @@ Email : yuhuang.hu@ini.uzh.ch
 from __future__ import print_function, absolute_import
 
 import os
+import time
 
 import tkinter as tk
 from tkinter.ttk import Progressbar
@@ -34,6 +35,14 @@ BUTTON_FONT = "Helvetica 20"
 # label dimensions
 PARAM_LABEL_WIDTH = 20
 BUTTON_LABEL_WIDTH = 20
+
+# GRID corpus
+command = ["bin", "lay", "place", "set"]
+color = ["blue", "green", "red", "white"]
+preposition = ["at", "by", "in", "with"]
+letter = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
+digit = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "zero"]
+adverb = ["again", "now", "please", "soon"]
 
 
 class LipreadingRecording(tk.Frame):
@@ -231,6 +240,16 @@ class LipreadingRecording(tk.Frame):
 
         # start looping through the sentences
         # TODO
+        sentences = self.prepare_text(self.num_sentences)
+        for sen_id in range(self.num_sentences):
+            # get the text
+            curr_sentence = sentences[sen_id]
+
+            # get to control flow
+            success = self.record_one_sentence(curr_sentence, sen_id)
+
+            # pause the gap
+            time.sleep(self.gap)
 
         # complete trial
         self.enable_param_text()
@@ -248,6 +267,37 @@ class LipreadingRecording(tk.Frame):
         self.num_sentence_text["state"] = "normal"
         self.duration_text["state"] = "normal"
         self.gap_text["state"] = "normal"
+
+    def record_one_sentence(self, text, text_id):
+        print("I'm the control flow for one sentences.")
+
+        # construct the save paths
+        filename_base = text.replace(" ", "_")+"_"+str(text_id)
+        davis_save_path = os.path.join(
+            self.current_trial_folder, filename_base+"_davis.aedat")
+        das_save_path = os.path.join(
+            self.current_trial_folder, filename_base+"_das.aedat")
+        mic_save_path = os.path.join(
+            self.current_trial_folder, filename_base+"_mic.wav")
+
+        # zero time stamps for all windows
+        # start logging for all sensors
+
+        # give beep for signal
+        # display text and change the text color
+
+        # wait for duration long
+        time.sleep(self.duration)
+
+        # change the text to None
+
+        # save all the files
+        # close logging
+
+        # return true
+
+    def prepare_text(self, num_sentences=50):
+        print("I'm preparing {} sentencese".format(num_sentences))
 
     def stop_button_cmd(self):
         print("Stop button")
