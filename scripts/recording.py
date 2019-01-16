@@ -196,6 +196,9 @@ class LipreadingRecording(tk.Frame):
     def start_button_cmd(self):
         print("Start button")
 
+        # get all variables in the parameter boxes
+        
+
     def stop_button_cmd(self):
         print("Stop button")
 
