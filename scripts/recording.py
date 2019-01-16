@@ -9,8 +9,7 @@ from __future__ import print_function, absolute_import
 import os
 import time
 import pickle
-from random import shuffle
-from builtins import input
+from random import shuffle, randint
 
 import tkinter as tk
 from tkinter.ttk import Progressbar
@@ -115,7 +114,7 @@ class LipreadingRecording(tk.Frame):
 
         # progress bar
         self.progress_val = tk.IntVar()
-        self.progress_val.set(40)
+        self.progress_val.set(0)
         self.progress_bar = Progressbar(
             self.progress_frame, length=100,
             orient="horizontal",
@@ -247,20 +246,29 @@ class LipreadingRecording(tk.Frame):
         #  assert os.path.isdir(self.current_trial_folder) is False
         #  os.makedirs(self.current_trial_folder)
 
+        # start sign
+        self.display_text("We are about to start!", "green")
+        self.sleep(3)
+
         # start looping through the sentences
         # TODO
         sentences = self.prepare_text(self.num_sentences)
         for sen_id in range(self.num_sentences):
             # get the text
-            #  curr_sentence = sentences[sen_id]
+            self.progress_bar.step(int(100/self.num_sentences))
+            curr_sentence = sentences[sen_id]
 
             # get to control flow
-            success = self.record_one_sentence("this is this", sen_id)
+            success = self.record_one_sentence(curr_sentence, sen_id)
 
             # pause the gap
-            do_skip = self.check_skip_pressed()
+            do_skip, extra_sleep = self.check_skip_pressed()
             self.remove_last_recording(do_skip)
+            if extra_sleep != 0:
+                self.sleep(extra_sleep)
 
+        # End sign
+        self.display_text("This trial ends. Thank you!", "green")
         # complete trial
         self.enable_param_text()
 
@@ -279,8 +287,6 @@ class LipreadingRecording(tk.Frame):
         self.gap_text["state"] = "normal"
 
     def record_one_sentence(self, text, text_id):
-        print("I'm the control flow for one sentences.")
-
         # construct the save paths
         #  filename_base = text.replace(" ", "_")+"_"+str(text_id)
         #  davis_save_path = os.path.join(
@@ -314,7 +320,10 @@ class LipreadingRecording(tk.Frame):
         self.text_label["fg"] = color
 
     def prepare_text(self, num_sentences=20):
-        print("I'm preparing {} sentencese".format(num_sentences))
+        start_idx = randint(0, 64000-num_sentences)
+        end_idx = start_idx+num_sentences
+
+        return GRID_CORPUS[start_idx:end_idx]
 
     def stop_button_cmd(self):
         print("Stop button")
@@ -329,16 +338,19 @@ class LipreadingRecording(tk.Frame):
 
     def check_skip_pressed(self, num_checks=10):
         """Skip if true, False otherwise."""
-        for _ in range(num_checks):
+        sleep_time = self.gap/num_checks
+        for check_idx in range(num_checks):
             self.sleep(self.gap/num_checks)
 
             if self.skip_curr_item is True:
-                return True
-        return False
+                return True, sleep_time*(num_checks-check_idx+1)
+        return False, 0
 
     def remove_last_recording(self, do_remove=False):
         """For cleaning the last recording if skip."""
-        pass
+        if do_remove is True:
+            print("about to clean up this bad recording.")
+            self.skip_curr_item = False
 
     def training_button_cmd(self):
         self.training_button["text"] = "Stop Training"
