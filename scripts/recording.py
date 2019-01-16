@@ -19,6 +19,11 @@ PARAM_ROWS, PARAM_COLS, PARAM_X, PARAM_Y = 4, 3, 6, 0
 BUTTON_ROWS, BUTTON_COLS, BUTTON_X, BUTTON_Y = 4, 3, 6, 3
 PROGRESS_COLS, PROGRESS_X, PROGRESS_Y = 6, 10, 0
 
+TEXT_BG_COLOR = "antique white"
+PARAM_BG_COLOR = "#FFC107"
+BUTTON_BG_COLOR = "#B2FF59"
+PROGRESS_BG_COLOR = "#80D8FF"
+
 
 class LipreadingRecording(tk.Frame):
     def __init__(self, master=None):
@@ -40,7 +45,7 @@ class LipreadingRecording(tk.Frame):
         self.configure_grid(self.master, MASTER_ROWS, MASTER_COLS)
 
         # text frame
-        self.text_frame = tk.Frame(self.master, bg="antique white")
+        self.text_frame = tk.Frame(self.master, bg=TEXT_BG_COLOR)
         self.text_frame.grid(
             row=TEXT_X, column=TEXT_Y, rowspan=TEXT_ROWS,
             columnspan=TEXT_COLS,
@@ -48,13 +53,13 @@ class LipreadingRecording(tk.Frame):
 
         # text label
         self.text_label = tk.Label(
-            self.text_frame, text="hello",
+            self.text_frame, text="Welcome",
             font="Helvetica 50 bold",
-            bg="antique white")
+            bg=TEXT_BG_COLOR)
         self.text_label.place(relx=0.5, rely=0.5, anchor="center")
 
         # parameter frame
-        self.param_frame = tk.Frame(self.master, bg="#FFC107")
+        self.param_frame = tk.Frame(self.master, bg=PARAM_BG_COLOR)
         self.param_frame.grid(
             row=PARAM_X, column=PARAM_Y,
             rowspan=PARAM_ROWS, columnspan=PARAM_COLS,
@@ -63,7 +68,7 @@ class LipreadingRecording(tk.Frame):
         self.parameter_frame_widgets()
 
         # button frame
-        self.button_frame = tk.Frame(self.master, bg="green")
+        self.button_frame = tk.Frame(self.master, bg=BUTTON_BG_COLOR)
         self.button_frame.grid(
             row=BUTTON_X, column=BUTTON_Y,
             rowspan=BUTTON_ROWS, columnspan=BUTTON_COLS,
@@ -73,7 +78,7 @@ class LipreadingRecording(tk.Frame):
 
         # progress frame
         self.progress_frame = tk.Frame(
-            self.master, bg="azure", bd=1)
+            self.master, bg=PROGRESS_BG_COLOR, bd=1)
         self.progress_frame.grid(
             row=PROGRESS_X, column=PROGRESS_Y, columnspan=PROGRESS_COLS,
             sticky=tk.W+tk.E+tk.N+tk.S)
@@ -113,7 +118,7 @@ class LipreadingRecording(tk.Frame):
         self.subject_label = tk.Label(
             self.param_frame, text="Subject ID:",
             font="Helvetica 20",
-            bg="#FFC107")
+            bg=PARAM_BG_COLOR)
         self.subject_label.grid(row=0, column=0)
         self.subject_text = tk.Entry(self.param_frame, font="Helvetica 20")
         self.subject_text.grid(row=0, column=1, columnspan=2)
@@ -121,7 +126,7 @@ class LipreadingRecording(tk.Frame):
         self.trail_label = tk.Label(
             self.param_frame, text="No. Trial(s):",
             font="Helvetica 20",
-            bg="#FFC107")
+            bg=PARAM_BG_COLOR)
         self.trail_label.grid(row=1, column=0)
         self.trail_text = tk.Entry(self.param_frame, font="Helvetica 20")
         self.trail_text.grid(row=1, column=1, columnspan=2)
@@ -129,7 +134,7 @@ class LipreadingRecording(tk.Frame):
         self.num_sentence_label = tk.Label(
             self.param_frame, text="No. sentence(s):",
             font="Helvetica 20",
-            bg="#FFC107")
+            bg=PARAM_BG_COLOR)
         self.num_sentence_label.grid(row=2, column=0)
         self.num_sentence_text = tk.Entry(
             self.param_frame, font="Helvetica 20")
@@ -138,7 +143,7 @@ class LipreadingRecording(tk.Frame):
         self.duration_label = tk.Label(
             self.param_frame, text="Duration [secs]:",
             font="Helvetica 20",
-            bg="#FFC107")
+            bg=PARAM_BG_COLOR)
         self.duration_label.grid(row=3, column=0)
         self.duration_text = tk.Entry(
             self.param_frame, font="Helvetica 20")
