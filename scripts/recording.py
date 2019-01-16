@@ -8,6 +8,9 @@ from __future__ import print_function, absolute_import
 
 import os
 import time
+import pickle
+from random import shuffle
+from builtins import input
 
 import tkinter as tk
 from tkinter.ttk import Progressbar
@@ -44,12 +47,18 @@ letter = "ABCDEFGHIJKLMNOPQRSTUVXYZ"
 digit = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "zero"]
 adverb = ["again", "now", "please", "soon"]
 
+# load all possible sentences and randomly choose them
+GRID_CORPUS = pickle.load(open("GRID_corpus.pkl", "rb"))
+shuffle(GRID_CORPUS)
+
 
 class LipreadingRecording(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
         self.data_root_dir = None
+        self.skip_curr_item = False
+        self.gap_wait_counter = 0
         #  self.pack()
         self.grid()
         self.create_widgets()
@@ -186,7 +195,7 @@ class LipreadingRecording(tk.Frame):
         self.num_sentence_label.grid(row=2, column=0)
         self.num_sentence_text = tk.Entry(
             self.param_frame, font=PARAM_FONT)
-        self.num_sentence_text.insert(tk.END, "50")
+        self.num_sentence_text.insert(tk.END, "20")
         self.num_sentence_text.grid(row=2, column=1, columnspan=2)
 
         self.duration_label = tk.Label(
@@ -232,24 +241,25 @@ class LipreadingRecording(tk.Frame):
         self.disable_param_text()
 
         # construct recording folder
-        self.validate_data_root()
-        self.current_trial_folder = os.path.join(
-            self.data_root_dir, self.subject_id, self.trial_id)
-        assert os.path.isdir(self.current_trial_folder) is False
-        os.makedirs(self.current_trial_folder)
+        #  self.validate_data_root()
+        #  self.current_trial_folder = os.path.join(
+        #      self.data_root_dir, self.subject_id, self.trial_id)
+        #  assert os.path.isdir(self.current_trial_folder) is False
+        #  os.makedirs(self.current_trial_folder)
 
         # start looping through the sentences
         # TODO
         sentences = self.prepare_text(self.num_sentences)
         for sen_id in range(self.num_sentences):
             # get the text
-            curr_sentence = sentences[sen_id]
+            #  curr_sentence = sentences[sen_id]
 
             # get to control flow
-            success = self.record_one_sentence(curr_sentence, sen_id)
+            success = self.record_one_sentence("this is this", sen_id)
 
             # pause the gap
-            time.sleep(self.gap)
+            do_skip = self.check_skip_pressed()
+            self.remove_last_recording(do_skip)
 
         # complete trial
         self.enable_param_text()
@@ -272,41 +282,71 @@ class LipreadingRecording(tk.Frame):
         print("I'm the control flow for one sentences.")
 
         # construct the save paths
-        filename_base = text.replace(" ", "_")+"_"+str(text_id)
-        davis_save_path = os.path.join(
-            self.current_trial_folder, filename_base+"_davis.aedat")
-        das_save_path = os.path.join(
-            self.current_trial_folder, filename_base+"_das.aedat")
-        mic_save_path = os.path.join(
-            self.current_trial_folder, filename_base+"_mic.wav")
+        #  filename_base = text.replace(" ", "_")+"_"+str(text_id)
+        #  davis_save_path = os.path.join(
+        #      self.current_trial_folder, filename_base+"_davis.aedat")
+        #  das_save_path = os.path.join(
+        #      self.current_trial_folder, filename_base+"_das.aedat")
+        #  mic_save_path = os.path.join(
+        #      self.current_trial_folder, filename_base+"_mic.wav")
 
         # zero time stamps for all windows
         # start logging for all sensors
 
         # give beep for signal
         # display text and change the text color
+        self.display_text(text, color="red")
 
         # wait for duration long
-        time.sleep(self.duration)
+        self.sleep(self.duration)
 
         # change the text to None
+        self.display_text("", color="red")
 
         # save all the files
         # close logging
 
         # return true
 
-    def prepare_text(self, num_sentences=50):
+    def display_text(self, text, color):
+        """Change text label's content."""
+        self.text_label["text"] = text
+        self.text_label["fg"] = color
+
+    def prepare_text(self, num_sentences=20):
         print("I'm preparing {} sentencese".format(num_sentences))
 
     def stop_button_cmd(self):
         print("Stop button")
 
     def skip_button_cmd(self):
-        print("Skip button")
+        self.skip_curr_item = True
+
+    def sleep(self, duration):
+        """Just sleep for a second."""
+        self.master.update()
+        time.sleep(duration)
+
+    def check_skip_pressed(self, num_checks=10):
+        """Skip if true, False otherwise."""
+        for _ in range(num_checks):
+            self.sleep(self.gap/num_checks)
+
+            if self.skip_curr_item is True:
+                return True
+        return False
+
+    def remove_last_recording(self, do_remove=False):
+        """For cleaning the last recording if skip."""
+        pass
 
     def training_button_cmd(self):
-        print("Training button")
+        self.training_button["text"] = "Stop Training"
+        self.training_button["command"] = self.stop_training_cmd
+
+    def stop_training_cmd(self):
+        self.training_button["text"] = "Start Training"
+        self.training_button["command"] = self.training_button_cmd
 
     def select_data_root(self):
         self.data_root_dir = askdirectory()
