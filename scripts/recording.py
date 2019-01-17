@@ -33,8 +33,8 @@ PROGRESS_BG_COLOR = "#80D8FF"
 
 # font choice
 TEXT_FONT = "Helvetica 50 bold"
-PARAM_FONT = "Helvetica 20"
-BUTTON_FONT = "Helvetica 20"
+PARAM_FONT = "Helvetica 15"
+BUTTON_FONT = "Helvetica 15"
 
 # label dimensions
 PARAM_LABEL_WIDTH = 20
