@@ -368,7 +368,7 @@ class LipreadingRecording(tk.Frame):
             self.davis_control.stop_logging()
             self.das_control.stop_logging()
             audio_contrl.terminate()
-            
+
             # TODO quick file checker
 
             return (davis_save_path, das_save_path, mic_save_path)
