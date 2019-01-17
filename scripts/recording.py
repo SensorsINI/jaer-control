@@ -8,6 +8,7 @@ from __future__ import print_function, absolute_import
 
 import os
 import time
+import subprocess as sp
 import pickle
 from random import shuffle, randint
 
@@ -66,6 +67,10 @@ def play_sound():
     status = sd.wait()
 
     return status
+
+
+def log_sound(filepath):
+    return sp.Popen(["python", "audio_logger.py", filepath])
 
 
 class LipreadingRecording(tk.Frame):
@@ -344,7 +349,7 @@ class LipreadingRecording(tk.Frame):
                 davis_save_path, title=None, reset_time=False)
             self.das_control.start_logging(
                 das_save_path, title=None, reset_time=False)
-            # TODO: to start logging mic
+            audio_contrl = log_sound(mic_save_path)
 
         # give beep for signal
         # display text and change the text color
@@ -362,7 +367,9 @@ class LipreadingRecording(tk.Frame):
             # close logging
             self.davis_control.stop_logging()
             self.das_control.stop_logging()
-            # TODO: to stop logging mic
+            audio_contrl.terminate()
+            
+            # TODO quick file checker
 
             return (davis_save_path, das_save_path, mic_save_path)
         else:
