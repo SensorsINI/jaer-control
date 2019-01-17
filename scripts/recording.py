@@ -20,10 +20,10 @@ from jaercon.controller import jAERController
 # global parameters
 WIN_WIDTH, WIN_HEIGHT = 1280, 800
 MASTER_ROWS, MASTER_COLS = 13, 6
-TEXT_ROWS, TEXT_COLS, TEXT_X, TEXT_Y = 7, 6, 0, 0
-PARAM_ROWS, PARAM_COLS, PARAM_X, PARAM_Y = 5, 3, 7, 0
-BUTTON_ROWS, BUTTON_COLS, BUTTON_X, BUTTON_Y = 5, 3, 7, 3
-PROGRESS_COLS, PROGRESS_X, PROGRESS_Y = 6, 11, 0
+TEXT_ROWS, TEXT_COLS, TEXT_X, TEXT_Y = 1, 2, 0, 0
+PARAM_ROWS, PARAM_COLS, PARAM_X, PARAM_Y = 1, 1, 1, 0
+BUTTON_ROWS, BUTTON_COLS, BUTTON_X, BUTTON_Y = 1, 1, 1, 1
+PROGRESS_COLS, PROGRESS_X, PROGRESS_Y = 2, 2, 0
 
 # color choice
 TEXT_BG_COLOR = "#EEEEEE"
@@ -75,9 +75,20 @@ class LipreadingRecording(tk.Frame):
         for c in range(num_cols):
             master.columnconfigure(c, weight=weight)
 
+    def create_master_layout(self):
+        # rows
+        self.master.rowconfigure(0, weight=7)
+        self.master.rowconfigure(1, weight=2)
+        self.master.rowconfigure(2, weight=1)
+
+        # column
+        self.master.columnconfigure(0, weight=1)
+        self.master.columnconfigure(1, weight=2)
+
     def create_widgets(self):
         # get grid layout
-        self.configure_grid(self.master, MASTER_ROWS, MASTER_COLS, 1)
+        #  self.configure_grid(self.master, MASTER_ROWS, MASTER_COLS, 1)
+        self.create_master_layout()
 
         # text frame
         self.text_frame = tk.Frame(self.master, bg=TEXT_BG_COLOR)
@@ -99,7 +110,7 @@ class LipreadingRecording(tk.Frame):
             row=PARAM_X, column=PARAM_Y,
             rowspan=PARAM_ROWS, columnspan=PARAM_COLS,
             sticky=tk.W+tk.E+tk.N+tk.S)
-        self.configure_grid(self.param_frame, PARAM_ROWS, PARAM_COLS, 0)
+        self.configure_grid(self.param_frame, 5, 2, 1)
         self.parameter_frame_widgets()
 
         # button frame
@@ -108,7 +119,7 @@ class LipreadingRecording(tk.Frame):
             row=BUTTON_X, column=BUTTON_Y,
             rowspan=BUTTON_ROWS, columnspan=BUTTON_COLS,
             sticky=tk.W+tk.E+tk.N+tk.S)
-        self.configure_grid(self.button_frame, BUTTON_ROWS, BUTTON_COLS, 0)
+        self.configure_grid(self.button_frame, 5, 1, 1)
         self.button_frame_widgets()
 
         # progress frame
