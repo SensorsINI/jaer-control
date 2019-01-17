@@ -15,6 +15,9 @@ import tkinter as tk
 from tkinter.ttk import Progressbar
 from tkinter.filedialog import askdirectory
 
+import sounddevice as sd
+import soundfile as sf
+
 from jaercon.controller import jAERController
 
 # global parameters
@@ -49,8 +52,20 @@ digit = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "zero"]
 adverb = ["again", "now", "please", "soon"]
 
 # load all possible sentences and randomly choose them
-GRID_CORPUS = pickle.load(open("GRID_corpus.pkl", "rb"))
+GRID_CORPUS = pickle.load(
+    open(os.path.join("res", "GRID_corpus.pkl"), "rb"))
 shuffle(GRID_CORPUS)
+
+# load the sound
+beep_data, beep_fs = sf.read(
+    os.path.join("res", "beep.wav"), dtype="float32")
+
+
+def play_sound():
+    sd.play(beep_data, beep_fs)
+    status = sd.wait()
+
+    return status
 
 
 class LipreadingRecording(tk.Frame):
@@ -333,6 +348,7 @@ class LipreadingRecording(tk.Frame):
 
         # give beep for signal
         # display text and change the text color
+        play_sound()
         self.display_text(text, color="red")
 
         # wait for duration long
