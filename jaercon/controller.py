@@ -46,15 +46,15 @@ class jAERController(object):
         """Open the socket connection."""
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.conn.bind(("".encode('utf-8'), 0))
-        print("The socket is established for %s:%s."
+        print("[jAERController MSG] The socket is established for %s:%s."
               % (self.remote_ip, self.udp_port))
 
     def close_connection(self):
         """Close socket connection."""
         try:
             self.conn.close()
-            print("The socket attached to {}:{} is closed".format(
-                self.remote_ip, self.udp_port))
+            print("[jAERController MSG] The socket attached \
+                   to {}:{} is closed".format(self.remote_ip, self.udp_port))
         except TypeError:
             raise
 
@@ -95,7 +95,8 @@ class jAERController(object):
             self.conn.sendto(line.encode('utf-8'), self.address)
 
             data, fromaddr = self.conn.recvfrom(self.bufsize)
-            print("Client received %r from %r" % (data, fromaddr))
+            print("[jAERController MSG] Client received %r from %r"
+                  % (data, fromaddr))
 
             return rec_path
         except TypeError:
@@ -107,7 +108,8 @@ class jAERController(object):
             self.conn.sendto("stoplogging".encode('utf-8'), self.address)
             data, fromaddr = self.conn.recvfrom(self.bufsize)
 
-            print("Client received %r form %r" % (data, fromaddr))
+            print("[jAERController MSG] Client received %r form %r"
+                  % (data, fromaddr))
         except TypeError:
             raise
 

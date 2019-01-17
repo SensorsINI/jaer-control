@@ -32,7 +32,7 @@ BUTTON_BG_COLOR = "#B2FF59"
 PROGRESS_BG_COLOR = "#80D8FF"
 
 # font choice
-TEXT_FONT = "Helvetica 50 bold"
+TEXT_FONT = "Helvetica 70 bold"
 PARAM_FONT = "Helvetica 15"
 BUTTON_FONT = "Helvetica 15"
 
@@ -371,14 +371,11 @@ class LipreadingRecording(tk.Frame):
 
     def sleep(self, duration):
         """Just sleep for a second."""
-        #  print(duration*1000)
-        #  after_sleep = self.master.after(int(duration*1000))
-        #  self.master.after_cancel(after_sleep)
         try:
             self.master.update()
             time.sleep(duration)
         except Exception:
-            self.master.destroy()
+            pass
 
     def check_skip_pressed(self, num_checks=10):
         """Skip if true, False otherwise."""
@@ -394,12 +391,14 @@ class LipreadingRecording(tk.Frame):
         """For cleaning the last recording if skip."""
         if do_remove is True:
             try:
+                print("-"*50)
                 os.remove(save_paths[0])
-                print("Recording %s removed" % (save_paths[0]))
+                print("[RECORDING MSG] Recording %s removed" % (save_paths[0]))
                 os.remove(save_paths[1])
-                print("Recording %s removed" % (save_paths[1]))
+                print("[RECORDING MSG] Recording %s removed" % (save_paths[1]))
                 os.remove(save_paths[2])
-                print("Recording %s removed" % (save_paths[2]))
+                print("[RECORDING MSG] Recording %s removed" % (save_paths[2]))
+                print("-"*50)
             except OSError:
                 pass
 
@@ -451,6 +450,8 @@ class LipreadingRecording(tk.Frame):
 
     def select_data_root(self):
         self.data_root_dir = askdirectory()
+        print("[RECORDING MSG] The data directory is set to %s"
+              % (self.data_root_dir))
 
 
 root = tk.Tk()
