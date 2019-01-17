@@ -152,19 +152,19 @@ class LipreadingRecording(tk.Frame):
         self.skip_button["command"] = self.skip_button_cmd
         self.skip_button.grid(row=2, column=0, columnspan=3)
 
-        self.stop_button = tk.Button(self.button_frame)
-        self.stop_button["text"] = "Stop"
-        self.stop_button["font"] = BUTTON_FONT
-        self.stop_button["width"] = BUTTON_LABEL_WIDTH
-        self.stop_button["command"] = self.stop_button_cmd
-        self.stop_button.grid(row=3, column=0, columnspan=3)
-
         self.select_root_button = tk.Button(self.button_frame)
         self.select_root_button["text"] = "Select Data Root"
         self.select_root_button["font"] = BUTTON_FONT
         self.select_root_button["width"] = BUTTON_LABEL_WIDTH
         self.select_root_button["command"] = self.select_data_root
-        self.select_root_button.grid(row=4, column=0, columnspan=3)
+        self.select_root_button.grid(row=3, column=0, columnspan=3)
+
+        self.stop_button = tk.Button(self.button_frame)
+        self.stop_button["text"] = "Quit"
+        self.stop_button["font"] = BUTTON_FONT
+        self.stop_button["width"] = BUTTON_LABEL_WIDTH
+        self.stop_button["command"] = self.stop_button_cmd
+        self.stop_button.grid(row=4, column=0, columnspan=3)
 
     def parameter_frame_widgets(self):
         # text boxes
@@ -235,6 +235,9 @@ class LipreadingRecording(tk.Frame):
             os.makedirs(self.data_root_dir)
 
     def start_button_cmd(self):
+        self.start_button["text"] = "Trial in place"
+        self.start_button["state"] = "disabled"
+
         # get all variables in the parameter boxes
         self.subject_id = self.subject_text.get()
         self.trial_id = self.trial_text.get()
@@ -274,8 +277,14 @@ class LipreadingRecording(tk.Frame):
 
         # End sign
         self.display_text("This trial ends. Thank you!", "green")
+        self.sleep(3)
+        self.display_text("Welcome", "black")
         # complete trial
         self.enable_param_text()
+
+        # restore button's text
+        self.start_button["text"] = "Start"
+        self.start_button["state"] = "normal"
 
     def disable_param_text(self):
         self.subject_text["state"] = "disabled"
@@ -291,24 +300,25 @@ class LipreadingRecording(tk.Frame):
         self.duration_text["state"] = "normal"
         self.gap_text["state"] = "normal"
 
-    def record_one_sentence(self, text, text_id):
+    def record_one_sentence(self, text, text_id, training=False):
         # construct the save paths
-        filename_base = text.replace(" ", "_")+"_"+str(text_id)
-        davis_save_path = os.path.join(
-            self.current_trial_folder, filename_base+"_davis.aedat")
-        das_save_path = os.path.join(
-            self.current_trial_folder, filename_base+"_das.aedat")
-        mic_save_path = os.path.join(
-            self.current_trial_folder, filename_base+"_mic.wav")
+        if training is False:
+            filename_base = text.replace(" ", "_")+"_"+str(text_id)
+            davis_save_path = os.path.join(
+                self.current_trial_folder, filename_base+"_davis.aedat")
+            das_save_path = os.path.join(
+                self.current_trial_folder, filename_base+"_das.aedat")
+            mic_save_path = os.path.join(
+                self.current_trial_folder, filename_base+"_mic.wav")
 
-        # zero time stamps for all windows
-        self.davis_control.reset_time()
-        # start logging for all sensors
-        self.davis_control.start_logging(
-            davis_save_path, title=None, reset_time=False)
-        self.das_control.start_logging(
-            das_save_path, title=None, reset_time=False)
-        # TODO: to start logging mic
+            # zero time stamps for all windows
+            self.davis_control.reset_time()
+            # start logging for all sensors
+            self.davis_control.start_logging(
+                davis_save_path, title=None, reset_time=False)
+            self.das_control.start_logging(
+                das_save_path, title=None, reset_time=False)
+            # TODO: to start logging mic
 
         # give beep for signal
         # display text and change the text color
@@ -320,13 +330,16 @@ class LipreadingRecording(tk.Frame):
         # change the text to None
         self.display_text("------", color="blue")
 
-        # save all the files
-        # close logging
-        self.davis_control.stop_logging()
-        self.das_control.stop_logging()
-        # TODO: to stop logging mic
+        if training is False:
+            # save all the files
+            # close logging
+            self.davis_control.stop_logging()
+            self.das_control.stop_logging()
+            # TODO: to stop logging mic
 
-        return (davis_save_path, das_save_path, mic_save_path)
+            return (davis_save_path, das_save_path, mic_save_path)
+        else:
+            return ("", "", "")
 
     def display_text(self, text, color):
         """Change text label's content."""
@@ -340,15 +353,21 @@ class LipreadingRecording(tk.Frame):
         return GRID_CORPUS[start_idx:end_idx]
 
     def stop_button_cmd(self):
-        print("Stop button")
+        self.master.destroy()
 
     def skip_button_cmd(self):
         self.skip_curr_item = True
 
     def sleep(self, duration):
         """Just sleep for a second."""
-        self.master.update()
-        time.sleep(duration)
+        #  print(duration*1000)
+        #  after_sleep = self.master.after(int(duration*1000))
+        #  self.master.after_cancel(after_sleep)
+        try:
+            self.master.update()
+            time.sleep(duration)
+        except Exception:
+            self.master.destroy()
 
     def check_skip_pressed(self, num_checks=10):
         """Skip if true, False otherwise."""
@@ -377,12 +396,47 @@ class LipreadingRecording(tk.Frame):
             self.skip_curr_item = False
 
     def training_button_cmd(self):
-        self.training_button["text"] = "Stop Training"
-        self.training_button["command"] = self.stop_training_cmd
+        self.training_button["text"] = "Training in place"
+        self.training_button["state"] = "disabled"
 
-    def stop_training_cmd(self):
+        # get all variables in the parameter boxes
+        self.subject_id = self.subject_text.get()
+        self.trial_id = self.trial_text.get()
+        self.num_sentences = int(self.num_sentence_text.get())
+        self.duration = float(self.duration_text.get())  # in secs
+        self.gap = float(self.gap_text.get())  # in secs
+
+        # freeze the change of the variables
+        self.disable_param_text()
+
+        # start sign
+        self.display_text("We are about to start!", "green")
+        self.sleep(3)
+
+        # start looping through the sentences
+        sentences = self.prepare_text(self.num_sentences)
+        for sen_id in range(self.num_sentences):
+            # get the text
+            self.progress_bar.step(int(100/self.num_sentences))
+            curr_sentence = sentences[sen_id]
+
+            # get to control flow
+            self.record_one_sentence(curr_sentence, sen_id, training=True)
+
+            # pause the gap
+            do_skip, extra_sleep = self.check_skip_pressed()
+            if extra_sleep != 0:
+                self.sleep(extra_sleep)
+
+        # End sign
+        self.display_text("This trial ends. Thank you!", "green")
+        self.sleep(3)
+        self.display_text("Welcome", "black")
+        # complete trial
+        self.enable_param_text()
+
         self.training_button["text"] = "Start Training"
-        self.training_button["command"] = self.training_button_cmd
+        self.training_button["state"] = "normal"
 
     def select_data_root(self):
         self.data_root_dir = askdirectory()

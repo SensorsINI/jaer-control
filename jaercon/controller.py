@@ -46,7 +46,8 @@ class jAERController(object):
         """Open the socket connection."""
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.conn.bind(("".encode('utf-8'), 0))
-        print("The socket is established.")
+        print("The socket is established for %s:%s."
+              % (self.remote_ip, self.udp_port))
 
     def close_connection(self):
         """Close socket connection."""
