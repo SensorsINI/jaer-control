@@ -286,6 +286,11 @@ class LipreadingRecording(tk.Frame):
         assert os.path.isdir(self.current_trial_folder) is False
         os.makedirs(self.current_trial_folder)
 
+        # setup ground truth folder
+        gt_file_path = os.path.join(
+            (self.current_trial_folder, "gt_sentences.txt"))
+        gt_file = open(gt_file_path, "a+")
+
         # start sign
         self.display_text("We are about to start!", "green")
         self.sleep(3)
@@ -302,11 +307,15 @@ class LipreadingRecording(tk.Frame):
 
             # pause the gap
             do_skip, extra_sleep = self.check_skip_pressed()
+            if do_skip is False:
+                gt_file.write(curr_sentence+"\n")
+
             self.remove_last_recording(save_paths, do_skip)
             if extra_sleep != 0:
                 self.sleep(extra_sleep)
 
         # End sign
+        gt_file.close()
         self.display_text("This trial ends. Thank you!", "green")
         self.sleep(3)
         self.display_text("Welcome", "black")
@@ -381,6 +390,7 @@ class LipreadingRecording(tk.Frame):
         self.text_label["fg"] = color
 
     def prepare_text(self, num_sentences=20):
+        # TODO improve this choice so no one has the repeated sentences
         start_idx = randint(0, 64000-num_sentences)
         end_idx = start_idx+num_sentences
 
