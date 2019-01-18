@@ -267,7 +267,7 @@ class LipreadingRecording(tk.Frame):
 
         # make a copy of list of sentences in the data root
         self.curr_GRID_CORPUS_path = os.path.join(
-            (self.data_root_dir, "temp_GRID_corpus.pkl"))
+            self.data_root_dir, "temp_GRID_corpus.pkl")
         if not os.path.isfile(self.curr_GRID_CORPUS_path):
             with open(self.curr_GRID_CORPUS_path, "wb") as f:
                 pickle.dump(GRID_CORPUS, f)
@@ -295,7 +295,7 @@ class LipreadingRecording(tk.Frame):
 
         # setup ground truth folder
         gt_file_path = os.path.join(
-            (self.current_trial_folder, "gt_sentences.txt"))
+            self.current_trial_folder, "gt_sentences.txt")
         gt_file = open(gt_file_path, "a+")
 
         # start sign
