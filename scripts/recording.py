@@ -9,6 +9,7 @@ from __future__ import print_function, absolute_import
 import os
 import time
 import subprocess as sp
+from copy import deepcopy
 import pickle
 from random import shuffle, randint
 
@@ -55,7 +56,6 @@ adverb = ["again", "now", "please", "soon"]
 # load all possible sentences and randomly choose them
 GRID_CORPUS = pickle.load(
     open(os.path.join("res", "GRID_corpus.pkl"), "rb"))
-shuffle(GRID_CORPUS)
 
 # load the sound
 beep_data, beep_fs = sf.read(
@@ -264,6 +264,12 @@ class LipreadingRecording(tk.Frame):
             self.data_root_dir = os.path.join(
                 os.environ["HOME"], "lipreading_data")
             os.makedirs(self.data_root_dir)
+            # make a copy of list of sentences in the data root
+            self.curr_GRID_CORPUS_path = os.path.join(
+                (self.data_root_dir, "temp_GRID_corpus.pkl"))
+            if not os.path.isfile(self.curr_GRID_CORPUS_path):
+                with open(self.curr_GRID_CORPUS_path, "wb") as f:
+                    pickle.dump(GRID_CORPUS, f)
 
     def start_button_cmd(self):
         self.start_button["text"] = "Trial in place"
@@ -390,11 +396,24 @@ class LipreadingRecording(tk.Frame):
         self.text_label["fg"] = color
 
     def prepare_text(self, num_sentences=20):
-        # TODO improve this choice so no one has the repeated sentences
-        start_idx = randint(0, 64000-num_sentences)
+        with open(self.curr_GRID_CORPUS_path, "rb") as f:
+            curr_GRID_CORPUS = pickle.load(f)
+            shuffle(curr_GRID_CORPUS)
+            f.close()
+
+        num_avail_sentences = len(curr_GRID_CORPUS)
+
+        start_idx = randint(0, num_avail_sentences-num_sentences)
         end_idx = start_idx+num_sentences
 
-        return GRID_CORPUS[start_idx:end_idx]
+        prepared_text = deepcopy(curr_GRID_CORPUS[start_idx:end_idx])
+        del curr_GRID_CORPUS[start_idx:end_idx]
+
+        with open(self.curr_GRID_CORPUS_path, "wb") as f:
+            pickle.dump(curr_GRID_CORPUS, f)
+            f.close()
+
+        return prepared_text
 
     def stop_button_cmd(self):
         self.master.destroy()
