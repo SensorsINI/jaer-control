@@ -7,6 +7,7 @@ Email : yuhuang.hu@ini.uzh.ch
 from __future__ import print_function, absolute_import
 
 import os
+import sys
 import time
 import subprocess as sp
 from copy import deepcopy
@@ -70,7 +71,7 @@ def play_sound():
 
 
 def log_sound(filepath):
-    return sp.Popen(["python", "audio_logger.py", filepath])
+    return sp.Popen([sys.executable, "audio_logger.py", filepath])
 
 
 class LipreadingRecording(tk.Frame):
