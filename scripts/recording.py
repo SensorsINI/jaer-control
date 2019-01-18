@@ -359,13 +359,17 @@ class LipreadingRecording(tk.Frame):
                 self.current_trial_folder, filename_base+"_mic.wav")
 
             # zero time stamps for all windows
-            self.davis_control.reset_time()
+            # TODO: make sure zerotimestamps by sync devices
+            self.davis_control.reset_time(no_wait=True)
+            self.das_control.reset_time(no_wait=True)
+            self.sleep(0.2)
             # start logging for all sensors
             self.davis_control.start_logging(
                 davis_save_path, title=None, reset_time=False)
             self.das_control.start_logging(
                 das_save_path, title=None, reset_time=False)
             audio_contrl = log_sound(mic_save_path)
+            self.sleep(0.2)
 
         # give beep for signal
         # display text and change the text color

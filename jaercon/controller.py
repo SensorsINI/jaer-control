@@ -58,7 +58,7 @@ class jAERController(object):
         except TypeError:
             raise
 
-    def reset_time(self):
+    def reset_time(self, no_wait=False):
         """Reset timestamps."""
         try:
             self.conn.sendto("zerotimestamps".encode('utf-8'), self.address)
