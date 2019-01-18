@@ -264,12 +264,13 @@ class LipreadingRecording(tk.Frame):
             self.data_root_dir = os.path.join(
                 os.environ["HOME"], "lipreading_data")
             os.makedirs(self.data_root_dir)
-            # make a copy of list of sentences in the data root
-            self.curr_GRID_CORPUS_path = os.path.join(
-                (self.data_root_dir, "temp_GRID_corpus.pkl"))
-            if not os.path.isfile(self.curr_GRID_CORPUS_path):
-                with open(self.curr_GRID_CORPUS_path, "wb") as f:
-                    pickle.dump(GRID_CORPUS, f)
+
+        # make a copy of list of sentences in the data root
+        self.curr_GRID_CORPUS_path = os.path.join(
+            (self.data_root_dir, "temp_GRID_corpus.pkl"))
+        if not os.path.isfile(self.curr_GRID_CORPUS_path):
+            with open(self.curr_GRID_CORPUS_path, "wb") as f:
+                pickle.dump(GRID_CORPUS, f)
 
     def start_button_cmd(self):
         self.start_button["text"] = "Trial in place"
