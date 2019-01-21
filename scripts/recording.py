@@ -78,8 +78,8 @@ def play_sound():
 
 
 def log_sound(filepath):
-    print(sys.executable)
-    return sp.Popen([sys.executable, "audio_logger.py", filepath])
+    return sp.Popen([sys.executable, "audio_logger.py", filepath],
+                    shell=True)
 
 
 class LipreadingRecording(tk.Frame):
