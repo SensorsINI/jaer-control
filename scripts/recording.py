@@ -6,9 +6,12 @@ Email : yuhuang.hu@ini.uzh.ch
 
 from __future__ import print_function, absolute_import
 
+import argparse
+
 import os
 import sys
 import time
+import timeit
 import subprocess as sp
 from copy import deepcopy
 import pickle
@@ -23,6 +26,14 @@ import sounddevice as sd
 import soundfile as sf
 
 from jaercon.controller import jAERController
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--debug", action="store_true")
+args = parser.parse_args()
+
+# display debug mode
+if args.debug is True:
+    print("[DEBUG MSG] This session is in the debug mode")
 
 # global parameters
 WIN_WIDTH, WIN_HEIGHT = 1280, 800
@@ -39,7 +50,7 @@ BUTTON_BG_COLOR = "#B2FF59"
 PROGRESS_BG_COLOR = "#80D8FF"
 
 # font choice
-TEXT_FONT = "Helvetica 70 bold"
+TEXT_FONT = "Helvetica 60 bold"
 PARAM_FONT = "Helvetica 15"
 BUTTON_FONT = "Helvetica 15"
 
@@ -315,8 +326,14 @@ class LipreadingRecording(tk.Frame):
         gt_file = open(gt_file_path, "a+")
 
         # start sign
+        if args.debug is True:
+            start_time = timeit.default_timer()
         self.display_text("We are about to start!", "green")
         self.sleep(3)
+        if args.debug is True:
+            end_time = timeit.default_timer()
+            print("[DEBUG MSG] Start sign used %.3f secs"
+                  % (end_time-start_time))
 
         # start looping through the sentences
         sentences = self.prepare_text(self.num_sentences)
@@ -326,9 +343,17 @@ class LipreadingRecording(tk.Frame):
             curr_sentence = sentences[sen_id]
 
             # get to control flow
+            if args.debug is True:
+                start_time = timeit.default_timer()
             save_paths = self.record_one_sentence(curr_sentence, sen_id)
+            if args.debug is True:
+                end_time = timeit.default_timer()
+                print("[DEBUG MSG] Sentence %s used %.3f secs"
+                      % (curr_sentence, end_time-start_time))
 
             # pause the gap
+            if args.debug is True:
+                start_time = timeit.default_timer()
             do_skip, extra_sleep = self.check_skip_pressed()
             if do_skip is False:
                 gt_file.write(curr_sentence+"\n")
@@ -336,6 +361,10 @@ class LipreadingRecording(tk.Frame):
             self.remove_last_recording(save_paths, do_skip)
             if extra_sleep != 0:
                 self.sleep(extra_sleep)
+            if args.debug is True:
+                end_time = timeit.default_timer()
+                print("[DEBUG MSG] Total skip for %s used %.3f secs"
+                      % (curr_sentence, end_time-start_time))
 
         # End sign
         gt_file.close()
