@@ -68,6 +68,7 @@ beep_data = beep_data[:, np.newaxis]
 trigger_data = trigger_data[:, np.newaxis]
 
 total_data = np.append(trigger_data, beep_data, axis=1)
+total_data = total_data[38400:67200]
 
 # sleep sound
 sleep_fs = 44100
@@ -375,7 +376,6 @@ class LipreadingRecording(tk.Frame):
             #  self.das_control.reset_time(no_wait=True)
             #  self.sleep(0.2)
             # start logging for all sensors
-            play_sound()
             self.davis_control.start_logging(
                 davis_save_path, title=None, reset_time=False)
             self.das_control.start_logging(
@@ -384,6 +384,7 @@ class LipreadingRecording(tk.Frame):
             #  self.sleep(0.2)
 
         # give beep for signal
+        play_sound()
         # display text and change the text color
         self.display_text(text, color="red")
 
