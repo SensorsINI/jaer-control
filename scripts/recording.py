@@ -496,7 +496,7 @@ class LipreadingRecording(tk.Frame):
         self.sleep(3)
 
         # start looping through the sentences
-        sentences = self.prepare_text(self.num_sentences)
+        sentences = self.prepare_text(self.num_sentences, training=True)
         for sen_id in range(self.num_sentences):
             # get the text
             self.progress_bar.step(int(100/self.num_sentences))
