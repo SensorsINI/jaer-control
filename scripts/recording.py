@@ -8,7 +8,6 @@ from __future__ import print_function, absolute_import
 
 import os
 import sys
-import time
 import subprocess as sp
 from copy import deepcopy
 import pickle
@@ -70,8 +69,12 @@ trigger_data = trigger_data[:, np.newaxis]
 total_data = np.append(trigger_data, beep_data, axis=1)
 total_data = total_data[38400:67200]
 
-# sleep sound
-sleep_fs = 44100
+
+def reset_time():
+    sd.play(total_data[:, 0], beep_fs)
+    status = sd.wait()
+
+    return status
 
 
 def play_sound():
@@ -371,10 +374,7 @@ class LipreadingRecording(tk.Frame):
                 self.current_trial_folder, filename_base+"_mic.wav")
 
             # zero time stamps for all windows
-            # TODO: make sure zerotimestamps by sync devices
-            #  self.davis_control.reset_time(no_wait=True)
-            #  self.das_control.reset_time(no_wait=True)
-            #  self.sleep(0.2)
+            reset_time()
             # start logging for all sensors
             self.davis_control.start_logging(
                 davis_save_path, title=None, reset_time=False)
