@@ -434,32 +434,38 @@ class LipreadingRecording(tk.Frame):
                 start_time = timeit.default_timer()
             self.davis_control.start_logging(
                 davis_save_path, title=None, reset_time=False)
+            if args.debug is True:
+                end_time = timeit.default_timer()
+                print(Fore.RED+"[DEBUG MSG] DAVIS logging %s used %.3f secs"
+                      % (text, end_time-start_time))
+                print(Style.RESET_ALL)
+            if args.debug is True:
+                start_time = timeit.default_timer()
             self.das_control.start_logging(
                 das_save_path, title=None, reset_time=False)
+            if args.debug is True:
+                end_time = timeit.default_timer()
+                print(Fore.RED+"[DEBUG MSG] DAS logging %s used %.3f secs"
+                      % (text, end_time-start_time))
+                print(Style.RESET_ALL)
+            if args.debug is True:
+                start_time = timeit.default_timer()
             audio_contrl = log_sound(mic_save_path)
             if args.debug is True:
                 end_time = timeit.default_timer()
-                print(Fore.RED+"[DEBUG MSG] Start logging %s used %.3f secs"
+                print(Fore.RED+"[DEBUG MSG] AUDIO logging %s used %.3f secs"
                       % (text, end_time-start_time))
                 print(Style.RESET_ALL)
             #  self.sleep(0.2)
 
-        # give beep for signal
-        if args.debug is True:
-            start_time = timeit.default_timer()
-        play_sound()
-        if args.debug is True:
-            end_time = timeit.default_timer()
-            print(Fore.RED+"[DEBUG MSG] Beep plays for %s used %.3f secs"
-                  % (text, end_time-start_time))
-            print(Style.RESET_ALL)
-
         # display text and change the text color
-        if args.debug is True:
-            start_time = timeit.default_timer()
         self.display_text(text, color="red")
 
+        # play sound for signal
+        play_sound()
         # wait for duration long
+        if args.debug is True:
+            start_time = timeit.default_timer()
         self.sleep(self.duration)
 
         if args.debug is True:
