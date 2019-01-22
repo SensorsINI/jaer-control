@@ -24,6 +24,8 @@ from tkinter.filedialog import askdirectory
 import numpy as np
 import sounddevice as sd
 import soundfile as sf
+from colorama import init
+from colorama import Fore, Back, Style
 
 from jaercon.controller import jAERController
 
@@ -31,9 +33,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--debug", action="store_true")
 args = parser.parse_args()
 
+# reset for colored output
+init()
+
+
 # display debug mode
 if args.debug is True:
-    print("[DEBUG MSG] This session is in the debug mode")
+    print(Fore.RED+"[DEBUG MSG] This session is in the debug mode")
+    print(Style.RESET_ALL)
 
 # global parameters
 WIN_WIDTH, WIN_HEIGHT = 1280, 800
@@ -332,8 +339,9 @@ class LipreadingRecording(tk.Frame):
         self.sleep(3)
         if args.debug is True:
             end_time = timeit.default_timer()
-            print("[DEBUG MSG] Start sign used %.3f secs"
+            print(Fore.RED+"[DEBUG MSG] Start sign used %.3f secs"
                   % (end_time-start_time))
+            print(Style.RESET_ALL)
 
         # start looping through the sentences
         sentences = self.prepare_text(self.num_sentences)
@@ -348,8 +356,9 @@ class LipreadingRecording(tk.Frame):
             save_paths = self.record_one_sentence(curr_sentence, sen_id)
             if args.debug is True:
                 end_time = timeit.default_timer()
-                print("[DEBUG MSG] Sentence %s used %.3f secs"
+                print(Fore.RED+"[DEBUG MSG] Sentence %s used %.3f secs"
                       % (curr_sentence, end_time-start_time))
+                print(Style.RESET_ALL)
 
             # pause the gap
             if args.debug is True:
@@ -363,13 +372,21 @@ class LipreadingRecording(tk.Frame):
                 self.sleep(extra_sleep)
             if args.debug is True:
                 end_time = timeit.default_timer()
-                print("[DEBUG MSG] Total skip for %s used %.3f secs"
+                print(Fore.RED+"[DEBUG MSG] Total skip for %s used %.3f secs"
                       % (curr_sentence, end_time-start_time))
+                print(Style.RESET_ALL)
 
         # End sign
         gt_file.close()
+        if args.debug is True:
+            start_time = timeit.default_timer()
         self.display_text("This trial ends. Thank you!", "green")
         self.sleep(3)
+        if args.debug is True:
+            end_time = timeit.default_timer()
+            print(Fore.RED+"[DEBUG MSG] End sign used %.3f secs"
+                  % (end_time-start_time))
+            print(Style.RESET_ALL)
         self.display_text("Welcome", "black")
         # complete trial
         self.enable_param_text()
