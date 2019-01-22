@@ -8,6 +8,7 @@ from __future__ import print_function, absolute_import
 
 import os
 import sys
+import time
 import subprocess as sp
 from copy import deepcopy
 import pickle
@@ -412,7 +413,7 @@ class LipreadingRecording(tk.Frame):
         self.text_label["text"] = text
         self.text_label["fg"] = color
 
-    def prepare_text(self, num_sentences=20):
+    def prepare_text(self, num_sentences=20, training=False):
         with open(self.curr_GRID_CORPUS_path, "rb") as f:
             curr_GRID_CORPUS = pickle.load(f)
             shuffle(curr_GRID_CORPUS)
@@ -424,11 +425,12 @@ class LipreadingRecording(tk.Frame):
         end_idx = start_idx+num_sentences
 
         prepared_text = deepcopy(curr_GRID_CORPUS[start_idx:end_idx])
-        del curr_GRID_CORPUS[start_idx:end_idx]
+        if training is False:
+            del curr_GRID_CORPUS[start_idx:end_idx]
 
-        with open(self.curr_GRID_CORPUS_path, "wb") as f:
-            pickle.dump(curr_GRID_CORPUS, f)
-            f.close()
+            with open(self.curr_GRID_CORPUS_path, "wb") as f:
+                pickle.dump(curr_GRID_CORPUS, f)
+                f.close()
 
         return prepared_text
 
@@ -441,13 +443,8 @@ class LipreadingRecording(tk.Frame):
     def sleep(self, duration):
         """Just sleep for a second."""
         try:
-            #  sleep_audio = np.zeros((int(sleep_fs*duration),),
-            #                         dtype=np.float32)
-            #  sd.play(sleep_audio, sleep_fs)
-            #  sd.wait()
             self.master.update()
-            #  time.sleep(duration)
-            sd.sleep(int(duration*1000))
+            time.sleep(duration)
         except Exception:
             pass
 
