@@ -421,22 +421,52 @@ class LipreadingRecording(tk.Frame):
                 self.current_trial_folder, filename_base+"_mic.wav")
 
             # zero time stamps for all windows
+            if args.debug is True:
+                start_time = timeit.default_timer()
             reset_time()
+            if args.debug is True:
+                end_time = timeit.default_timer()
+                print(Fore.RED+"[DEBUG MSG] First reset %s used %.3f secs"
+                      % (text, end_time-start_time))
+                print(Style.RESET_ALL)
             # start logging for all sensors
+            if args.debug is True:
+                start_time = timeit.default_timer()
             self.davis_control.start_logging(
                 davis_save_path, title=None, reset_time=False)
             self.das_control.start_logging(
                 das_save_path, title=None, reset_time=False)
             audio_contrl = log_sound(mic_save_path)
+            if args.debug is True:
+                end_time = timeit.default_timer()
+                print(Fore.RED+"[DEBUG MSG] Start logging %s used %.3f secs"
+                      % (text, end_time-start_time))
+                print(Style.RESET_ALL)
             #  self.sleep(0.2)
 
         # give beep for signal
+        if args.debug is True:
+            start_time = timeit.default_timer()
         play_sound()
+        if args.debug is True:
+            end_time = timeit.default_timer()
+            print(Fore.RED+"[DEBUG MSG] Beep plays for %s used %.3f secs"
+                  % (text, end_time-start_time))
+            print(Style.RESET_ALL)
+
         # display text and change the text color
+        if args.debug is True:
+            start_time = timeit.default_timer()
         self.display_text(text, color="red")
 
         # wait for duration long
         self.sleep(self.duration)
+
+        if args.debug is True:
+            end_time = timeit.default_timer()
+            print(Fore.RED+"[DEBUG MSG] Text displays for %s used %.3f secs"
+                  % (text, end_time-start_time))
+            print(Style.RESET_ALL)
 
         # change the text to None
         self.display_text("------", color="blue")
@@ -444,9 +474,16 @@ class LipreadingRecording(tk.Frame):
         if training is False:
             # save all the files
             # close logging
+            if args.debug is True:
+                start_time = timeit.default_timer()
             self.davis_control.stop_logging()
             self.das_control.stop_logging()
             audio_contrl.terminate()
+            if args.debug is True:
+                end_time = timeit.default_timer()
+                print(Fore.RED+"[DEBUG MSG] Stop logging for %s used %.3f secs"
+                      % (text, end_time-start_time))
+                print(Style.RESET_ALL)
 
             # TODO quick file checker
 
