@@ -69,6 +69,9 @@ trigger_data = trigger_data[:, np.newaxis]
 
 total_data = np.append(trigger_data, beep_data, axis=1)
 
+# sleep sound
+sleep_fs = 44100
+
 
 def play_sound():
     sd.play(total_data, beep_fs)
@@ -437,8 +440,13 @@ class LipreadingRecording(tk.Frame):
     def sleep(self, duration):
         """Just sleep for a second."""
         try:
+            #  sleep_audio = np.zeros((int(sleep_fs*duration),),
+            #                         dtype=np.float32)
+            #  sd.play(sleep_audio, sleep_fs)
+            #  sd.wait()
             self.master.update()
-            time.sleep(duration)
+            #  time.sleep(duration)
+            sd.sleep(int(duration*1000))
         except Exception:
             pass
 
@@ -483,6 +491,7 @@ class LipreadingRecording(tk.Frame):
 
         # freeze the change of the variables
         self.disable_param_text()
+        self.validate_data_root()
 
         # start sign
         self.display_text("We are about to start!", "green")
