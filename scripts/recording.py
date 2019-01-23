@@ -87,7 +87,7 @@ trigger_data = trigger_data[:, np.newaxis]
 
 total_data = np.append(trigger_data, beep_data, axis=1)
 total_data = total_data[38400:67200]
-real_trigger = total_data[52000:53600, 0]
+real_trigger = total_data[50000:54800, 0]
 
 
 def reset_time():
