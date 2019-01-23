@@ -87,7 +87,7 @@ trigger_data = trigger_data[:, np.newaxis]
 
 total_data = np.append(trigger_data, beep_data, axis=1)
 total_data = total_data[38400:67200]
-real_trigger = deepcopy(total_data[43200:62400, 0])
+real_trigger = deepcopy(total_data[38400:67200, 0])
 
 
 def reset_time():
@@ -278,7 +278,7 @@ class LipreadingRecording(tk.Frame):
         self.duration_label.grid(row=3, column=0)
         self.duration_text = tk.Entry(
             self.param_frame, font=PARAM_FONT)
-        self.duration_text.insert(tk.END, "3")
+        self.duration_text.insert(tk.END, "4")
         self.duration_text.grid(row=3, column=1, columnspan=2)
 
         self.gap_label = tk.Label(
