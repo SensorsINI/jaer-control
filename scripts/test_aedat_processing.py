@@ -9,7 +9,7 @@ from __future__ import print_function, absolute_import
 import os
 
 from jaercon.procaedat import load_and_decode_ams1c, load_and_decode_davis_rec
-from jaercon.procaedat import check_davis_rec
+from jaercon.procaedat import check_davis_rec, check_das_rec
 import matplotlib.pyplot as plt
 
 # file string
@@ -27,8 +27,12 @@ das_path = os.path.join(
 #  timestamps, channel_id, ear_id, neuron_id, filterbank_id = \
 #      load_and_decode_ams1c(das_path, return_type=False)
 
-davis_events, ts = check_davis_rec(davis_path, level=2, verbose=True)
+# test davis recording file
+_ = load_and_decode_davis_rec(davis_path)
 
-plt.figure()
-plt.plot(ts)
-plt.show()
+#  davis_events, ts = check_davis_rec(davis_path, level=2, verbose=True)
+#  das_events, ts = check_das_rec(das_path, level=1, verbose=True)
+
+#  plt.figure()
+#  plt.plot(timestamps, channel_id, "o")
+#  plt.show()

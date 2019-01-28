@@ -339,9 +339,6 @@ def load_and_decode_davis_rec(file_path, length=0, verbose=False):
                     outputData["samples"][frame_count] = \
                         reset_frame-outputData["samples"][frame_idx]
 
-                    #  outputData["samples"][frame_count][
-                    #      outputData["samples"][frame_count] == 4] = 510
-
                     outputData["samples"][frame_count][
                         outputData["samples"][frame_count] > 32767] = 0
 
@@ -375,7 +372,7 @@ def load_and_decode_davis_rec(file_path, length=0, verbose=False):
     del outputData["reset"]
 
     return (events_ts, event_x_addrs, event_y_addrs, event_pols,
-            outputData["timeStampStart"], outputData["timeStampEnd"],
+            (outputData["timeStampStart"]+outputData["timeStampEnd"])//2,
             outputData["samples"])
 
 
