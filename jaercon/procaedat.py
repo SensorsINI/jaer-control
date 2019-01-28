@@ -5,11 +5,8 @@ Email : yuhuang.hu@ini.uzh.ch
 """
 
 from __future__ import print_function, absolute_import
-import struct
 import os
 import numpy as np
-
-import matplotlib.pyplot as plt
 
 # DAVIS related constant
 EVT_DVS = 0  # DVS event type
@@ -76,7 +73,123 @@ def get_file_length(file_path):
     return length
 
 
-def load_davis_rec(file_path, length=0, verbose=False):
+def check_davis_rec(file_path, level=0, verbose=False):
+    """Check if the DAVIS Recording is valid.
+
+    # Parameters
+    file_path : str
+        the absolute path of the DAVIS
+    level : int
+        Checking Level.
+        0: check if there is any bytes besides header
+        1: check if all the DVS events are valid
+        2: return the timestamps for plotting
+    verbose : bool
+        print debugging comments if True
+
+    # Returns
+    flag : bool
+        the file is valid if True
+        False otherwise
+    timestamps : numpy.ndarray
+        only return this object if check level is True
+    """
+    # check if the file exists
+    assert os.path.isfile(file_path) is True
+
+    davis_file = open(file_path, "rb")
+    file_length = get_file_length(file_path)
+    header_length = skip_header(davis_file)
+
+    if verbose is True:
+        print("Header length:", header_length, "bytes")
+        print("File length:", file_length, "bytes")
+
+    num_events = (file_length-header_length)//ae_len
+    if verbose is True:
+        print("Number of events:", num_events)
+
+    # checking number of events
+    if level == 0:
+        flag = True if num_events > 0 else False
+        return flag
+
+    # decode events
+    davis_events = np.fromfile(
+        davis_file, dtype=read_mode, count=2*num_events).reshape(
+            (num_events, 2)).astype(np.uint64)
+    davis_file.close()
+    if verbose is True:
+        print("Number of events:", davis_events.shape)
+
+    # decode event address
+    event_address = davis_events[:, 0]
+    timestamps = davis_events[:, 1]
+
+    event_types = event_address >> event_type_shift
+
+    # decode DVS events
+    events_ts = timestamps[event_types == 0]
+    event_x_addrs = (event_address[event_types == 0] & x_mask) >> x_shift
+    event_y_addrs = (event_address[event_types == 0] & y_mask) >> y_shift
+
+    event_x_valid = np.logical_and(
+        (event_x_addrs > 240), (event_x_addrs < 0)).sum()
+    event_y_valid = np.logical_and(
+        (event_y_addrs > 180), (event_y_addrs < 0)).sum()
+
+    if verbose is True:
+        print(event_x_valid)
+        print(event_y_valid)
+
+    event_valid = not bool(event_x_valid*event_y_valid)
+
+    if level == 1:
+        return event_valid
+
+    if level == 2:
+        if event_valid is True:
+            return event_valid, events_ts
+        else:
+            return False, None
+
+
+def check_das_rec(file_path, level=0, verbose=False):
+    """Check DAS recordings."""
+    assert os.path.isfile(file_path)
+
+    das_file = open(file_path, "rb")
+
+    # get some basic statics of the file and skip header of the file
+    num_bytes_per_event = 8
+    file_length = get_file_length(file_path)
+    header_length = skip_header(das_file)
+    if verbose is True:
+        print("Header length:", header_length, "bytes")
+        print("File length:", file_length, "bytes")
+    num_events = (file_length-header_length)//num_bytes_per_event
+    if verbose is True:
+        print("Number of events:", num_events)
+
+    if level == 0:
+        flag = True if num_events > 0 else False
+        return flag
+
+    # decode data
+    das_events = np.fromfile(
+        das_file, dtype='>u4', count=2*num_events).reshape(
+            (num_events, 2)).astype(np.uint32)
+    das_file.close()
+
+    if verbose is True:
+        print("Number of events:", das_events.shape)
+
+    if level == 1:
+        flag = True if num_events > 0 else False
+        return flag, das_events[:, 1]
+
+
+def load_and_decode_davis_rec(file_path, length=0, verbose=False):
     """Load DAVIS AER data.
 
     Only supports AEDAT2+DAVIS240
@@ -114,6 +227,7 @@ def load_davis_rec(file_path, length=0, verbose=False):
     davis_events = np.fromfile(
         davis_file, dtype=read_mode, count=2*num_events).reshape(
             (num_events, 2)).astype(np.uint64)
+    davis_file.close()
     if verbose is True:
         print("Number of events:", davis_events.shape)
 
