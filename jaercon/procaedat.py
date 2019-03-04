@@ -462,7 +462,7 @@ def decode_ams1c(timestamps, addresses, return_type=True):
 
     if return_type:
         type_id = get_type_id(
-            'ams1b', channel=channel_id, neuron=neuron_id,
+            'ams1c', channel=channel_id, neuron=neuron_id,
             filterbank=filterbank_id)
         return timestamps_cochlea, ear_id, type_id
 
@@ -475,8 +475,10 @@ def load_and_decode_ams1c(file_path,
                           verbose=False):
     """Load and decode ams1c."""
     timestamps, addresses = load_das_rec(file_path, max_events, verbose)
+    tr = find_trigger(timestamps)
+    real_timestamps, real_addresses = timestamps[tr:], addresses[tr:]
 
-    return decode_ams1c(timestamps, addresses, return_type)
+    return decode_ams1c(real_timestamps, real_addresses, return_type)
 
 
 def get_type_id(sensor_type, channel=None,
@@ -490,3 +492,9 @@ def get_type_id(sensor_type, channel=None,
         return type_id
     else:
         raise ValueError("Sensor type is not implemented")
+
+
+def find_trigger(x):
+    dx = 1e-3
+    dy = np.diff(x) / dx
+    return np.where(dy > 1e10)[0][-1] + 1
