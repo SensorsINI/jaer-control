@@ -570,7 +570,7 @@ def compute_das_spikerate(timestamps, channels, num_windows, min_time,
     return das_spike_count[:, channels_range[0]-1:channels_range[1]-1].T
 
 
-def compute_dvs_chunk_spikerate(dvs_spike_rate_shape, timestamps,
+def compute_dvs_chunk_spikerate(dvs_spike_rate, timestamps,
                                 x_addresses, y_addresses,
                                 chunk_id, chunk_size,
                                 window_size=0.005, stride_size=0.001):
@@ -597,7 +597,6 @@ def compute_dvs_chunk_spikerate(dvs_spike_rate_shape, timestamps,
 
         The first channel with id=1
     """
-    dvs_spike_rate = np.zeros(dvs_spike_rate_shape)
     for t, x, y in zip(timestamps, x_addresses, y_addresses):
         dvs_spike_rate[int(max(0, (t-window_size)//stride_size+1)):
                        int(t//stride_size)+1,
@@ -673,8 +672,6 @@ def compute_events_chunk_corr(events_corr_mat, dvs_spike_rate_chunk,
         :, chunk_id*chunk_shape[1]:(chunk_id+1)*chunk_shape[1],
         :] = cov_chunk
 
-    return events_corr_mat
-
 
 def compute_events_corr(davis_timestamps, x_addresses, y_addresses,
                         das_spike_rate, num_windows, min_time, max_time,
@@ -705,13 +702,13 @@ def compute_events_corr(davis_timestamps, x_addresses, y_addresses,
         temp_y_addrs = y_addresses[y_idx]
 
         # filling up this chunk
-        spike_chunk = compute_dvs_chunk_spikerate(
-            spike_chunk.shape, temp_time-min_time, temp_x_addrs, temp_y_addrs,
+        compute_dvs_chunk_spikerate(
+            spike_chunk, temp_time-min_time, temp_x_addrs, temp_y_addrs,
             chunk_id, y_chunk_size, window_size=window_size,
             stride_size=stride_size)
 
         # computing correlation
-        corr_mat = compute_events_chunk_corr(
+        compute_events_chunk_corr(
             corr_mat, spike_chunk, das_spike_rate, chunk_id)
 
         # restore to empty
