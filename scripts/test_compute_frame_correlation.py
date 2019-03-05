@@ -10,15 +10,15 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import cv2
 
 from jaercon import procaedat
 
 # data path
 data_path = os.path.join(
-    os.environ["HOME"], "data", "lipreading", "004", "2")
+    os.environ["HOME"], "data", "lipreading", "004", "5")
 #  file_name_base = "bin_blue_with_L_9_again_8"
-file_name_base = "bin_white_by_E_2_now_10"
+#  file_name_base = "bin_white_by_E_2_now_10"
+file_name_base = "bin_red_with_R_3_now_3"
 
 davis_file_path = os.path.join(
     data_path, file_name_base+"_davis.aedat")
@@ -63,11 +63,12 @@ clip_value = 3
 histrange = [(0, v) for v in (180, 240)]
 
 time_pre = ts_aps[0]
+frame_counter = 0
 
 # plot per frame correlation
-for frame_idx in range(1, num_frames, 2):
+for frame_idx in range(1, num_frames):
     # select time
-    time_pre = ts_aps[frame_idx-1]
+    #  time_pre = ts_aps[frame_idx-1]
     time_curr = ts_aps[frame_idx]
     print("Time pre:", time_pre, "Time curr:", time_curr)
 
@@ -127,20 +128,28 @@ for frame_idx in range(1, num_frames, 2):
         stride_size=stride_size, num_chunks=num_chunks)
 
     # plotting for correlation map and respective frame
-    frame_corr_mat = frame_corr_mat.mean(axis=0)
-    #  frame_corr_mat = np.flip(frame_corr_mat.mean(axis=0), axis=0)
-    #  frame_corr_mat = np.flip(frame_corr_mat, axis=1)
+    #  frame_corr_mat = np.abs(frame_corr_mat)
+    frame_corr_mat = np.flip(np.abs(frame_corr_mat.mean(axis=0)), axis=0)
+    frame_corr_mat = np.flip(frame_corr_mat, axis=1)
 
-    cv2.imshow("test", dvs_img)
-    cv2.waitKey(0)
-
-    plt.figure()
+    plt.figure(figsize=(15, 5))
     plt.subplot(131)
-    sns.heatmap(frame_corr_mat, square=True)
+    sns.heatmap(frame_corr_mat, square=True, cbar_kws={"shrink": .5})
     plt.axis("off")
+    plt.title("Frame {}; Time {}".format(frame_idx, time_curr))
     plt.subplot(132)
     plt.imshow(aps_frames[frame_idx], cmap="gray")
     plt.axis("off")
     plt.subplot(133)
     plt.imshow(dvs_img, cmap="gray")
-    plt.show()
+    plt.axis("off")
+    plt.tight_layout()
+
+    plt.savefig(os.path.join(
+        os.environ["HOME"], "data", "lipreading", "video_folder",
+        file_name_base+"_{}.jpeg".format(frame_counter)), dpi=300)
+
+    plt.close()
+    print("Frame {}/{}".format(frame_idx, num_frames))
+    frame_counter += 1
+    #  plt.show()
