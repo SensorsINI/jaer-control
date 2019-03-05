@@ -95,7 +95,7 @@ for frame_idx in range(1, num_frames):
     # plotting for correlation map and respective frame
     plt.figure()
     plt.subplot(121)
-    sns.heatmap(np.flip(frame_corr_mat.mean(axis=0), axis=0))
+    sns.heatmap(np.flip(frame_corr_mat.mean(axis=0), axis=0), square=True)
     plt.subplot(122)
     plt.imshow(aps_frames[frame_idx], cmap="gray")
     plt.show()
