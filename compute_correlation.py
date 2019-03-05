@@ -1,31 +1,26 @@
 # -*- coding: utf-8 -*-
 
 from os import path
-from cochelp import es_utils
 import numpy as np
-from jaercon.procaedat import load_and_decode_davis_rec, load_and_decode_ams1c
+from jaercon.procaedat import load_and_decode_davis_rec, load_and_decode_ams1c, find_trigger
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 num_x = 240
 num_y = 180
+window_size = 0.005  # secs
+stride_size = 0.001  # secs
 
 
-def find_trigger(x):
-    dx = 1e-3
-    dy = np.diff(x) / dx
-    return np.where(dy > 1e10)[0][-1] + 1
-
-
-def count_windows(das_timestamps, w=0.005, sd=0.001):
+def count_windows(das_timestamps, w=window_size, sd=stride_size):
     min_time = np.min(das_timestamps)
     max_time = np.max(das_timestamps)
-    num_windows = int(((max_time - min_time) // 0.001 + 1 - w * 1e3) // (sd * 1e3) + 1)
+    num_windows = int(((max_time-min_time)//0.001+1-w*1e3)//(sd*1e3)+1)
 
     return num_windows, max_time
 
 
-def count_das_spikes(das_timestamps, channels, num_windows, w=0.005, sd=0.001, n_channels=64):
+def count_das_spikes(das_timestamps, channels, num_windows, w=window_size, sd=stride_size, n_channels=64):
     """Spike count.
 
     Assume the resolution is 1ms
@@ -50,7 +45,7 @@ def count_das_spikes(das_timestamps, channels, num_windows, w=0.005, sd=0.001, n
 
 
 def calc_events_corr(davis_timestamps, x_addresses, y_addresses, das_spike_count, num_windows, max_time,
-                     w=0.005, sd=0.001, num_chunks=9):
+                     w=window_size, sd=stride_size, num_chunks=9):
 
     y_chunk_size = num_y//num_chunks
 
@@ -98,72 +93,14 @@ def calc_events_corr(davis_timestamps, x_addresses, y_addresses, das_spike_count
     return corr_mat
 
 
-folder = "/home/shuwang/Projects/Recordings/3/"
-filename_base = "lay_white_in_T_2_now_11"
-# filename_base = "place_green_in_C_3_again_0"
-davis_save_path = path.join(folder, filename_base+"_davis.aedat")
-das_save_path = path.join(folder, filename_base+"_das.aedat")
-
-davis_events = load_and_decode_davis_rec(davis_save_path, verbose=False)
-tr_davis = find_trigger(davis_events[0])
-
-# plt.plot([tr_davis, tr_davis], [0, max(davis_events[0])], '--y')
-# plt.plot(davis_events[0])
-# plt.title("Timestamps for DAVIS")
-# plt.xlabel("Index")
-# plt.ylabel("Timestamps")
-# plt.show()
-
-ts_davis = davis_events[0][tr_davis:]/1e6
-x_addrs = davis_events[1][tr_davis:]
-y_addrs = davis_events[2][tr_davis:]
-
-# time_diff = np.diff(davis_events[0].astype(np.int64))
-# print(np.where(time_diff < 0))
-
-das_ts, das_addrs = es_utils.loadaerdat(das_save_path)
-tr_das = find_trigger(das_ts)
-real_ts, real_addrs = das_ts[tr_das:], das_addrs[tr_das:]
-ts, ch, ear, ne, _ = es_utils.decode_ams1c(real_ts, real_addrs, return_type=False)
-
-# plt.plot([tr_das, tr_das], [0, max(das_ts)], '--y')
-# plt.plot(das_ts)
-# plt.title("Timestamps for DAS")
-# plt.xlabel("Index")
-# plt.ylabel("Timestamps")
-# plt.show()
-
-n_windows, max_t = count_windows(ts)
-das_spk_count = count_das_spikes(ts, ch, n_windows)  # window of 5ms
-# print("shape of DAS spike count:{}".format(das_spk_count.shape))
-# plt.imshow(das_spk_count, aspect='auto')
-# plt.show()
-
-corr_matrix = calc_events_corr(ts_davis, x_addrs, y_addrs, das_spk_count, n_windows, max_t)
-if np.any(np.logical_and(corr_matrix > 1, corr_matrix < -1)):
-    print("Wrong calculation on correlation.")
-
-
-# ts, ch, ear, ne, _ = load_and_decode_ams1c(das_save_path, return_type=False)
-
-# plt.clf()
-# plt.plot(ts, ch, '.')
-# # plt.plot(ts[ear == 0], ch[ear == 0], '.')
-# # plt.plot(ts[ear == 1], ch[ear == 1], '.')
-# plt.title("DAS Events")
-# plt.xlabel("Timestamps (s)")
-# plt.ylabel("Channels")
-# plt.show()
-
-
-def plot_corr_region(corr_mat, abs_value=False,
+def plot_corr_region(corr_mat, frame_id, take_abs=False,
                      intensity_perc=0.5, select_perc_high=0.9, select_perc_low=0.1,
                      region_plot=True, save_plot=False):
 
     region_save = ""
     abs_save = ""
 
-    if abs_value:
+    if take_abs:
         corr_matrix_mean = np.mean(np.abs(corr_mat), axis=0)
         abs_save = "_abs"
     else:
@@ -185,15 +122,17 @@ def plot_corr_region(corr_mat, abs_value=False,
     corr_select_x = corr_order_x[:cutoff_x, 1]
     corr_select_y = corr_order_x[:cutoff_y, 1]
 
-    plot_x_max = np.percentile(corr_select_x, select_perc_high)
-    plot_x_min = np.percentile(corr_select_x, select_perc_low)
-    plot_y_max = np.percentile(corr_select_y, select_perc_high)
-    plot_y_min = np.percentile(corr_select_y, select_perc_low)
-
     plt.figure()
     sns.heatmap(np.flip(corr_matrix_mean, axis=0))
     plt.title("Correlation Map")
+
     if region_plot:
+
+        plot_x_max = np.percentile(corr_select_x, select_perc_high)
+        plot_x_min = np.percentile(corr_select_x, select_perc_low)
+        plot_y_max = np.percentile(corr_select_y, select_perc_high)
+        plot_y_min = np.percentile(corr_select_y, select_perc_low)
+
         plt.hlines(plot_y_max, xmax=plot_x_max, xmin=plot_x_min, colors="w")
         plt.hlines(plot_y_min, xmax=plot_x_max, xmin=plot_x_min, colors="w")
         plt.vlines(plot_x_max, ymax=plot_y_max, ymin=plot_y_min, colors="w")
@@ -201,11 +140,38 @@ def plot_corr_region(corr_mat, abs_value=False,
         region_save = "_region"
 
     if save_plot:
-        plt.savefig(filename_base+"_corr"+abs_save+region_save, dpi=500)
+        plt.savefig(filename_base+"_"+str(frame_id)+"_corr"+abs_save+region_save, dpi=500)
     else:
         plt.show()
 
 
-plot_corr_region(corr_matrix[20:40],
-                 abs_value=False, intensity_perc=0.99, select_perc_high=90, select_perc_low=10,
-                 region_plot=False, save_plot=True)
+if __name__ == "__main__":
+
+    folder = "/home/shuwang/Projects/Recordings/Old/3/"
+    filename_base = "lay_white_in_T_2_now_11"
+    # filename_base = "place_green_in_C_3_again_0"
+
+    davis_save_path = path.join(folder, filename_base + "_davis.aedat")
+    das_save_path = path.join(folder, filename_base + "_das.aedat")
+
+    # Import DAVIS and DAS events
+    ts_dvs, x_addrs, y_addrs, _, ts_aps, aps_frames = load_and_decode_davis_rec(davis_save_path, verbose=False)
+    ts_das, ch, _, _, _ = load_and_decode_ams1c(das_save_path, return_type=False)
+
+    n_windows, max_t = count_windows(ts_das)
+    das_spk_count = count_das_spikes(ts_das, ch, n_windows)
+
+    for i in range(len(ts_aps)-1):
+
+        idx = np.where(np.logical_and(ts_dvs >= ts_aps[i], ts_dvs < ts_aps[i+1]))[0]
+        corr_matrix = calc_events_corr(ts_dvs[idx], x_addrs[idx], y_addrs[idx], das_spk_count, n_windows, max_t)
+
+        if np.any(np.logical_and(corr_matrix > 1, corr_matrix < -1)):
+            print("Wrong calculation on correlation.")
+
+        plot_corr_region(corr_matrix[20:40], idx+1,
+                         take_abs=False, intensity_perc=0.90, select_perc_high=90, select_perc_low=10,
+                         region_plot=False, save_plot=True)
+
+
+

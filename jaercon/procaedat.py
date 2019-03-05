@@ -371,9 +371,16 @@ def load_and_decode_davis_rec(file_path, length=0, verbose=False):
 
     del outputData["reset"]
 
-    return (events_ts, event_x_addrs, event_y_addrs, event_pols,
-            (outputData["timeStampStart"]+outputData["timeStampEnd"])//2,
-            outputData["samples"])
+    aps_ts = (outputData["timeStampStart"] + outputData["timeStampEnd"])//2
+
+    dvs_tr = find_trigger(events_ts)
+    aps_tr = find_trigger(aps_ts)
+
+    if aps_ts[aps_tr] < events_ts[dvs_tr]:
+        aps_tr += 1
+
+    return (events_ts[dvs_tr:]/1e6, event_x_addrs[dvs_tr:], event_y_addrs[dvs_tr:], event_pols[dvs_tr:],
+            aps_ts/1e6, outputData["samples"])
 
 
 def load_das_rec(file_path, max_events=30000000, verbose=False):
