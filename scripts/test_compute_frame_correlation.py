@@ -15,10 +15,11 @@ from jaercon import procaedat
 
 # data path
 data_path = os.path.join(
-    os.environ["HOME"], "data", "lipreading", "004", "5")
+    os.environ["HOME"], "data", "lipreading", "004", "4")
 #  file_name_base = "bin_blue_with_L_9_again_8"
 #  file_name_base = "bin_white_by_E_2_now_10"
-file_name_base = "bin_red_with_R_3_now_3"
+#  file_name_base = "bin_red_with_R_3_now_3"
+file_name_base = "bin_blue_at_Q_6_again_16"
 
 davis_file_path = os.path.join(
     data_path, file_name_base+"_davis.aedat")
@@ -59,7 +60,7 @@ num_frames = aps_frames.shape[0]
 window_size = 0.005
 stride_size = 0.001
 num_chunks = 9
-clip_value = 3
+clip_value = 5
 histrange = [(0, v) for v in (180, 240)]
 
 time_pre = ts_aps[0]
@@ -89,6 +90,7 @@ for frame_idx in range(1, num_frames):
     frame_pol = pol[frame_ts_dvs_idx]
 
     # construct DVS histogram
+    # TODO: to improve
     pol_on = (frame_pol == 1)
     pol_off = np.logical_not(pol_on)
     img_on, _, _ = np.histogram2d(
@@ -121,6 +123,8 @@ for frame_idx in range(1, num_frames):
         window_size=window_size, stride_size=stride_size,
         channels_range=[1, 64])
 
+    # TODO: to investigate if the correlation calculation is correct.
+    # TODO: why the axes are flipped.
     frame_corr_mat = procaedat.compute_events_corr(
         frame_ts_dvs, frame_x_adds, frame_y_adds,
         frame_das_spike_rate, frame_num_windows,
@@ -129,27 +133,33 @@ for frame_idx in range(1, num_frames):
 
     # plotting for correlation map and respective frame
     #  frame_corr_mat = np.abs(frame_corr_mat)
-    frame_corr_mat = np.flip(np.abs(frame_corr_mat.mean(axis=0)), axis=0)
+    frame_corr_mat = np.flip(frame_corr_mat.mean(axis=0), axis=0)
     frame_corr_mat = np.flip(frame_corr_mat, axis=1)
 
     plt.figure(figsize=(15, 5))
     plt.subplot(131)
     sns.heatmap(frame_corr_mat, square=True, cbar_kws={"shrink": .5})
     plt.axis("off")
-    plt.title("Frame {}; Time {}".format(frame_idx, time_curr))
     plt.subplot(132)
     plt.imshow(aps_frames[frame_idx], cmap="gray")
     plt.axis("off")
+    plt.title("Frame {}; Time {}s".format(frame_idx, time_curr))
     plt.subplot(133)
     plt.imshow(dvs_img, cmap="gray")
     plt.axis("off")
     plt.tight_layout()
 
-    plt.savefig(os.path.join(
+    vid_save_path = os.path.join(
         os.environ["HOME"], "data", "lipreading", "video_folder",
-        file_name_base+"_{}.jpeg".format(frame_counter)), dpi=300)
+        file_name_base)
+    if not os.path.isdir(vid_save_path):
+        os.makedirs(vid_save_path)
+
+    plt.savefig(
+        os.path.join(
+            vid_save_path, file_name_base+"_{}.jpeg".format(frame_counter)),
+        dpi=300)
 
     plt.close()
     print("Frame {}/{}".format(frame_idx, num_frames))
     frame_counter += 1
-    #  plt.show()
