@@ -13,13 +13,9 @@ import seaborn as sns
 
 from jaercon import procaedat
 
-# data path
 data_path = os.path.join(
-    os.environ["HOME"], "data", "lipreading", "004", "4")
-#  file_name_base = "bin_blue_with_L_9_again_8"
-#  file_name_base = "bin_white_by_E_2_now_10"
-#  file_name_base = "bin_red_with_R_3_now_3"
-file_name_base = "bin_blue_at_Q_6_again_16"
+    os.environ["HOME"], "Projects", "Repository", "LipReading", "Recordings", "004", "4")
+file_name_base = "bin_blue_with_E_5_now_4"
 
 davis_file_path = os.path.join(
     data_path, file_name_base+"_davis.aedat")
@@ -63,6 +59,7 @@ num_chunks = 9
 clip_value = 5
 histrange = [(0, v) for v in (180, 240)]
 
+# init
 time_pre = ts_aps[0]
 frame_counter = 0
 
@@ -131,7 +128,7 @@ for frame_idx in range(1, num_frames):
         frame_min_time, frame_max_time, window_size=window_size,
         stride_size=stride_size, num_chunks=num_chunks)
 
-    # plotting for correlation map and respective frame
+    # plot correlation map and respective frame
     #  frame_corr_mat = np.abs(frame_corr_mat)
     frame_corr_mat = np.flip(frame_corr_mat.mean(axis=0), axis=0)
     frame_corr_mat = np.flip(frame_corr_mat, axis=1)
@@ -150,7 +147,8 @@ for frame_idx in range(1, num_frames):
     plt.tight_layout()
 
     vid_save_path = os.path.join(
-        os.environ["HOME"], "data", "lipreading", "video_folder",
+        # os.environ["HOME"], "data", "lipreading", "video_folder",
+        os.environ["HOME"], "Projects", "Repository", "LipReading", "video_folder",
         file_name_base)
     if not os.path.isdir(vid_save_path):
         os.makedirs(vid_save_path)

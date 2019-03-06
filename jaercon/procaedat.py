@@ -509,11 +509,11 @@ def find_trigger(x):
 
 
 def count_windows(timestamps, window_size=0.005, stride_size=0.001):
-    """Calculate number of windows from a time stamp series.
+    """Calculate number of windows from a timestamp series.
 
     # Arguments
     timestamps: numpy.ndarray
-        1-D array that contains timestamps
+        1-D array that contains timestamps in secs
     window_size: float
         moving windows size in secs
     stride_size: float
@@ -522,6 +522,8 @@ def count_windows(timestamps, window_size=0.005, stride_size=0.001):
     # Returns
     num_windows: int
         number of windows in this timestamps array
+    min_time: int
+        the minimum time in this timestamps array (without zeroing)
     max_time: int
         the maximum time in this timestamps array (without zeroing)
     """
@@ -544,13 +546,17 @@ def compute_das_spikerate(timestamps, channels, num_windows, min_time,
 
     # Argument
     timestamps: numpy.ndarray
-        list of time stamps (stamps in secs)
-    channels: numpy.ndarrary
+        1-D array that contains timestamps in secs
+    channels: numpy.ndarray
         list of channel ids
+    num_windows: int
+        number of windows in this timestamps array
+    min_time: int
+        the minimum time in this timestamps array (without zeroing)
     window_size: float
-        sliding windows size, in (secs)
+        sliding windows size in secs
     stride_size: float
-        stride size, in (secs)
+        stride size in secs
     channels_range: list
         with two numbers that specify the range of the selected channels.
         e.g. [20, 40] selects channels 20 to 40
@@ -562,12 +568,12 @@ def compute_das_spikerate(timestamps, channels, num_windows, min_time,
         size in (num_channels, num_windows)
     """
     num_channels = 64
-    das_spike_count = np.zeros((num_windows, num_channels))
+    das_spike_count = np.zeros((num_channels, num_windows))
     for t, c in zip(timestamps-min_time, channels):
-        das_spike_count[
+        das_spike_count[c,
             int(max(0, (t-window_size)//stride_size+1)):
-            int(t//stride_size)+1, c] += 1
-    return das_spike_count[:, channels_range[0]-1:channels_range[1]-1].T
+            int(t//stride_size)+1] += 1
+    return das_spike_count[channels_range[0]-1:channels_range[1], :]
 
 
 def compute_dvs_chunk_spikerate(dvs_spike_rate, timestamps,
@@ -580,29 +586,26 @@ def compute_dvs_chunk_spikerate(dvs_spike_rate, timestamps,
 
     # Argument
     dvs_spike_rate: numpy.ndarray
-        (num_windows, height, width)
+        in (num_windows, height, width), initialized elsewhere beforehand
     timestamps: numpy.ndarray
-        list of time stamps (stamps in secs)
+        list of time stamps  in secs
     x_addresses: numpy.ndarray
         list of x address, assume [0, 239] if DAVIS240
     y_addresses: numpy.ndarray
         list of y address, assume [0, 179] if DAVIS240
+    chunk_id: int
+        the index of the chunk to be computed with
+    chunk_size: float
+        size of the chunk in y axis to be computed with
     window_size: float
-        sliding windows size, in (secs)
+        sliding windows size, in secs
     stride_size: float
-        stride size, in (secs)
-    channels_range: list
-        with two numbers that specify the range of the selected channels.
-        e.g. [20, 40] selects channels 20 to 40
-
-        The first channel with id=1
+        stride size, in secs
     """
     for t, x, y in zip(timestamps, x_addresses, y_addresses):
         dvs_spike_rate[int(max(0, (t-window_size)//stride_size+1)):
                        int(t//stride_size)+1,
                        int(y-chunk_id*chunk_size), x] += 1
-
-    return dvs_spike_rate
 
 
 def compute_dvs_spikerate(dvs_spike_rate, timestamps,
@@ -648,6 +651,8 @@ def compute_events_chunk_corr(events_corr_mat, dvs_spike_rate_chunk,
     """
     # take shape
     chunk_shape = dvs_spike_rate_chunk.shape
+    # (num_windows, y_chunk_size, width)
+
     # subtract mean from dvs spike rate chunk
     dvs_spike_rate_chunk -= np.mean(
         dvs_spike_rate_chunk, axis=0, keepdims=True)
@@ -680,12 +685,6 @@ def compute_events_corr(davis_timestamps, x_addresses, y_addresses,
     # chunk size along y axis
     y_chunk_size = height//num_chunks
 
-    # select signal
-    time_idx = (davis_timestamps <= max_time)
-    davis_timestamps = davis_timestamps[time_idx]
-    x_addresses = x_addresses[time_idx]
-    y_addresses = y_addresses[time_idx]
-
     # init spike chunk and correlation matrix
     spike_chunk = np.zeros((num_windows, y_chunk_size, width))
     corr_mat = np.zeros((das_spike_rate.shape[0], height, width))
@@ -694,20 +693,20 @@ def compute_events_corr(davis_timestamps, x_addresses, y_addresses,
     das_spike_rate -= np.mean(das_spike_rate, axis=1, keepdims=True)
 
     for chunk_id in range(num_chunks):
-        # selecting right portion of data
+        # select right portion of data
         y_idx = np.logical_and((y_addresses >= chunk_id*y_chunk_size),
                                (y_addresses < (chunk_id+1)*y_chunk_size))
         temp_time = davis_timestamps[y_idx]
         temp_x_addrs = x_addresses[y_idx]
         temp_y_addrs = y_addresses[y_idx]
 
-        # filling up this chunk
+        # fill up this chunk
         compute_dvs_chunk_spikerate(
             spike_chunk, temp_time-min_time, temp_x_addrs, temp_y_addrs,
             chunk_id, y_chunk_size, window_size=window_size,
             stride_size=stride_size)
 
-        # computing correlation
+        # compute correlation
         compute_events_chunk_corr(
             corr_mat, spike_chunk, das_spike_rate, chunk_id)
 
