@@ -14,6 +14,8 @@ from __future__ import print_function, absolute_import
 import os
 
 import numpy as np
+import h5py
+
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -72,10 +74,19 @@ print("[MESSAGE] Data loaded")
 # remove data before trigger
 dvs_trigger = procaedat.find_trigger((ts_dvs*1e6).astype(np.uint32))
 end_selection = dvs_trigger+25000
-ts_dvs = ts_dvs[dvs_trigger:end_selection]
-x_addrs = x_addrs[dvs_trigger:end_selection]
-y_addrs = y_addrs[dvs_trigger:end_selection]
-pol = pol[dvs_trigger:end_selection]
+ts_dvs = ts_dvs[dvs_trigger:]
+x_addrs = x_addrs[dvs_trigger:]
+y_addrs = y_addrs[dvs_trigger:]
+pol = pol[dvs_trigger:]
+
+data_export = h5py.File("test_recording.h5", "w")
+data_export.create_dataset("ts", dtype=np.float32, data=ts_dvs)
+data_export.create_dataset("x_addrs", dtype=np.float32, data=x_addrs)
+data_export.create_dataset("y_addrs", dtype=np.float32, data=y_addrs)
+data_export.create_dataset("pol", dtype=np.float32, data=pol)
+data_export.flush()
+
+data_export.close()
 
 print("Duration: {}".format(ts_dvs[-1]-ts_dvs[0]))
 
