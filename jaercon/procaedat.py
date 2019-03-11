@@ -189,7 +189,8 @@ def check_das_rec(file_path, level=0, verbose=False):
         return flag, das_events[:, 1]
 
 
-def load_and_decode_davis_rec(file_path, length=0, verbose=False):
+def load_and_decode_davis_rec(file_path, length=0,
+                              events_only=False, verbose=False):
     """Load DAVIS AER data.
 
     Only supports AEDAT2+DAVIS240
@@ -200,6 +201,8 @@ def load_and_decode_davis_rec(file_path, length=0, verbose=False):
     length : int
         Number of bytes(B) should be read.
         default: 0 to read whole file
+    events_only : bool
+        if True, only returns events
 
     # Returns
     dvs_events : numpy.ndarray
@@ -242,6 +245,9 @@ def load_and_decode_davis_rec(file_path, length=0, verbose=False):
     event_x_addrs = (event_address[event_types == 0] & x_mask) >> x_shift
     event_y_addrs = (event_address[event_types == 0] & y_mask) >> y_shift
     event_pols = (event_address[event_types == 0] & p_mask) >> p_shift
+
+    if events_only is True:
+        return (events_ts/1e6, event_x_addrs, event_y_addrs, event_pols)
 
     # decode frame events
     frame_ts = timestamps[event_types == 1]

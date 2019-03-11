@@ -59,25 +59,26 @@ def compute_dvs_chunk_spikerate(dvs_spike_rate, timestamps,
 
 # load data
 data_path = os.path.join(
-    os.environ["HOME"], "data", "lipreading", "004", "4")
-file_name_base = "bin_blue_at_Q_6_again_16"
+    os.environ["HOME"], "data", "lipreading")
+file_name_base = "tobi-juggle"
 
 davis_file_path = os.path.join(
     data_path, file_name_base+"_davis.aedat")
 
 # extract DAVIS events
-ts_dvs, x_addrs, y_addrs, pol, ts_aps, aps_frames = \
-    procaedat.load_and_decode_davis_rec(davis_file_path, verbose=False)
+ts_dvs, x_addrs, y_addrs, pol = \
+    procaedat.load_and_decode_davis_rec(
+        davis_file_path, events_only=True, verbose=False)
 
 print("[MESSAGE] Data loaded")
 
 # remove data before trigger
-dvs_trigger = procaedat.find_trigger((ts_dvs*1e6).astype(np.uint32))
-end_selection = dvs_trigger+25000
-ts_dvs = ts_dvs[dvs_trigger:]
-x_addrs = x_addrs[dvs_trigger:]
-y_addrs = y_addrs[dvs_trigger:]
-pol = pol[dvs_trigger:]
+#  dvs_trigger = procaedat.find_trigger((ts_dvs*1e6).astype(np.uint32))
+#  end_selection = dvs_trigger+25000
+#  ts_dvs = ts_dvs[dvs_trigger:]
+#  x_addrs = x_addrs[dvs_trigger:]
+#  y_addrs = y_addrs[dvs_trigger:]
+#  pol = pol[dvs_trigger:]
 
 data_export = h5py.File("test_recording.h5", "w")
 data_export.create_dataset("ts", dtype=np.float32, data=ts_dvs)
