@@ -14,8 +14,8 @@ import seaborn as sns
 from jaercon import procaedat
 
 data_path = os.path.join(
-    os.environ["HOME"], "Repository", "LipReading", "Recordings", "004", "4")
-file_name_base = "bin_blue_with_E_5_now_4"
+    os.environ["HOME"], "Repository", "LipReading", "Recordings", "004", "5")
+file_name_base = "bin_red_with_R_3_now_3"
 
 davis_file_path = os.path.join(
     data_path, file_name_base+"_davis.aedat")
@@ -94,7 +94,7 @@ for frame_idx in range(1, num_frames):
             180-frame_y_adds[pol_on], 240-frame_x_adds[pol_on],
             bins=(180, 240), range=histrange)
     img_off, _, _ = np.histogram2d(
-            180-frame_x_adds[pol_off], 240-frame_x_adds[pol_off],
+            180-frame_y_adds[pol_off], 240-frame_x_adds[pol_off],
             bins=(180, 240), range=histrange)
     if clip_value is not None:
         integrated_img = np.clip(
