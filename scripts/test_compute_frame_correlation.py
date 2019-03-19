@@ -14,7 +14,7 @@ import seaborn as sns
 from jaercon import procaedat
 
 data_path = os.path.join(
-    os.environ["HOME"], "Projects", "Repository", "LipReading", "Recordings", "004", "4")
+    os.environ["HOME"], "Repository", "LipReading", "Recordings", "004", "4")
 file_name_base = "bin_blue_with_E_5_now_4"
 
 davis_file_path = os.path.join(
@@ -148,7 +148,7 @@ for frame_idx in range(1, num_frames):
 
     vid_save_path = os.path.join(
         # os.environ["HOME"], "data", "lipreading", "video_folder",
-        os.environ["HOME"], "Projects", "Repository", "LipReading", "video_folder",
+        os.environ["HOME"], "Repository", "LipReading", "video_folder",
         file_name_base)
     if not os.path.isdir(vid_save_path):
         os.makedirs(vid_save_path)
