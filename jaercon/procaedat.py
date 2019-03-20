@@ -11,8 +11,8 @@ import numpy as np
 # DAVIS related constant
 EVT_DVS = 0  # DVS event type
 EVT_APS = 1  # APS event
-sizeX = 240
-sizeY = 180
+sizeX = 346
+sizeY = 260
 x0 = 1
 y0 = 1
 

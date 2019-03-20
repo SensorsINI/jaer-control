@@ -60,7 +60,7 @@ def compute_dvs_chunk_spikerate(dvs_spike_rate, timestamps,
 # load data
 data_path = os.path.join(
     os.environ["HOME"], "data", "lipreading")
-file_name_base = "tobi-juggle"
+file_name_base = "20Hz"
 
 davis_file_path = os.path.join(
     data_path, file_name_base+"_davis.aedat")
@@ -114,7 +114,7 @@ pos_y, neg_y = y_addrs[pos_idx], y_addrs[neg_idx]
 # construct spike rate matrix
 window_size = 0.005
 stride_size = 0.001
-height, width = 180, 240
+height, width = 260, 346
 num_chunks = 9
 chunk_size = height//num_chunks
 num_windows, min_time, max_time = procaedat.count_windows(
